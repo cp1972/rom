@@ -1,0 +1,5 @@
+#+Bibliography: /home/cpsoz/Github/rom/CP-ROM.bib
+
+* Einleitung. Was passiert um die KI
+
+Die Idee von dieser Arbeit ist aus den verschiedenen Gesprächen entstanden, die ich mit Kollegen zur Entwicklung der künstlichen Intelligenz (KI) durchgeführt habe, und die nach der Veröffentlichung vom Prognose "AI-2027" der Autoren Daniel Kokotajlo, Scott Alexander, Thomas Larsen, Eli Lifland und Romeo Dean an Brisanz gewonnen haben [cite:@ai-2027].
