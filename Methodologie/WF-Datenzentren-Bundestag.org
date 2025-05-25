@@ -1,0 +1,290 @@
+* Untersuchung der Protokollen des Bundestages und den Parlamentsdokumenten zum Thema Rechenzentren in Deutschland
+
+Die Protokollen des Bundestages befinden sich an der folgenden Adresse und können als xml-Dateien oder per API heruntergeladen werden: https://www.bundestag.de/services/opendata. Ein Github-Ordner bietet ein R-Objekt hier: https://github.com/benjaminguinaudeau/tidybundestag.
+Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API hier bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
+
+Beide Datenbanken an Dokumente liefern unterschiedliche Informationen zu den politischen Entscheidungen, die ab 1949 bis heute auf Bundesebene getroffen werden. Diese Grundlage erlaubt eine Rekonstruktion des thematischen Kontextes, in dem die Rechenzentren in Deutschland definiert und problematisiert worden sind. Entsprechend ist eine Untersuchung dieser Datenbanken zum Verständnis der Ausgangslage der Rechenzentren in Deutschland hilfreich. Eine solche Untersuchung wird in diesem Dokument anhand von Topic-Modellen und mit dem MTA-Software vorgenommen.
+
+** Vorgehen
+
+Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schleifen analysiert. Wir arbeiten mit einem LinuxOS bzw. in diesem Fall mit Linux Mint und beziehen wir uns auf die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
+
+Die Struktur der Quelldaten ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
+
+ - für die Parlamentsdokumente: von *.pdf zu *.txt;
+ - für die Protokollen: von *.xml zu *.txt.
+
+Bibliotheken, die dafür notwendig sind bzw. installiert werden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache.
+
+** Dieses Workflow als App benutzen
+
+Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet:
+
+#+begin_src bash :tangle meth-bundest.sh :shebang "#!/bin/bash"
+emacs --batch \
+      --eval "(require 'org)" \
+      --eval "(setq org-confirm-babel-evaluate nil)" \
+      --eval '(org-babel-tangle-file "WF-Datenzentren-Bundestag.org")'
+#+end_src
+
+Dieser Skript führt alle Code-Blöcke aus, die sich in diesem Dokument befindet. Er wird jedoch die im Rahmen von diesen Blöcken hergestellten Skript nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu tangle.sh hinzugefügt werden (etwa: =sh script.sh=). Ansonsten können die Blöcke in Emacs ausgeführt werden.
+
+* Parlamentsdokumente
+
+** Vorbereitung und Umwandlung
+
+Wir definieren den allgemeinen Benutzer-Pfad, wo wir einen Ordner "Walter" herstellen; die Arbeit wird in diesem Ordner stattfindet; der allgemeine Benutzer Pfad muss vom Benutzer angepasst werden.
+
+#+name: allgemeiner_pfad
+#+begin_src shell :results silent :noweb=yes :var all_path="/home/cpsoz"
+  echo $all-path
+#+end_src
+
+#+name: arbeitsordner
+#+begin_src shell :results silent :noweb=yes :var a_path=allgemeiner_pfad
+  cd $a_path
+  mkdir Walter
+#+end_src
+
+Wir definieren Pfade zu den Parlamentsdokumenten und zu den Protokollen.
+
+#+name: parlaments_pfad
+#+begin_src shell :results silent :noweb=yes :var parl_path="/ParlamentsDoc/Parlamentsdokumente_Sozialindex/*"
+  echo $parl_path
+#+end_src
+
+#+name: prtokolle_pfad
+#+begin_src shell :results silent :noweb=yes :var prot_path="/XML-Quellen/*"
+  echo $prot_path
+#+end_src
+
+Wir gehen zum Arbeitsordner und machen eine Sicherheitskopie vom Ordner ParlamentsDoc.
+
+#+begin_src shell :results silent :var apath=allgemeiner_pfad
+  cd $apath/Walter
+  cp -a ParlamentsDoc/. ParlamentsDoc_KOPIE/
+#+end_src
+
+Wir wandeln die *.pdf-Dateien der Parlamentsdokumente um. Zuerst erstellen wir einen bash-Skript, der pdftotext in einer Schleife verwendet, um die *.pdf-Datien umzuwandeln.
+
+#+name: pdftxt_parl
+#+begin_src bash :tangle pdftxt.sh :shebang "#!/bin/bash" :noweb=yes
+  for i in *.pdf; do pdftotext "$i"; done
+#+end_src
+
+Dann brauchen wir einen Skript, der uns zu jedem Ordner bringt, wo wir die Dokumente umwandeln und andere Dateien löschen, die wir für die Analyse nicht brauchen.
+
+#+name: umw_parl
+#+begin_src bash :tangle enterdir.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad :var bpath=parlaments_pfad :var pdfskript=pdftxt_parl
+  userpath='$apath/Walter$bpath'
+  parserpath='$apath/Walter'
+  for dir in $userpath; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $parserpath/$pdfskript && rm *.msg && rm *.docx; done;
+#+end_src
+
+Wir können jetzt die Skripts aktivieren und laufen lassen.
+
+#+begin_src shell :results silent
+  chmod +x pdftxt.sh
+  chmod +x enterdir.sh
+  sh enterdir.sh
+#+end_src
+
+** Corpus nach Stichwörtern sortieren
+
+In einem zweiten Schritt wollen wir die konvertierten Dateien nach Stichwörtern sortieren und die Ergebnisse in Ordner speichern, die mit diesen Stichwörtern gekennzeichnet werden. Dafür brauchen wir einen Skript, der in alle Ordner geht, und der einen anderen Skript ausführt, der die Dateien sortiert und in die vorgesehenen Ordner speichert.
+
+Der erste Skript sieht wie umw_parl aus, aber er muss einen anderen skript laufen lassen, den wir filter.sh benennen und der die folgenden Zeilen enthält:
+
+#+name: filter_parl
+#+begin_src bash :tangle filter.sh :shebang "#!/bin/bash" :noweb=yes
+  words=( "Forschung" "Transfer" "Stadt" "Smart Cit" "Sozialind" )
+  for i in "${words[@]}"; do grep "$i" *.* | awk -F: '{print $1}' | uniq > "$i".txt && mkdir "$i"_res && cp $(<"$i".txt) "$i"_res && rm "$i".txt; done
+#+end_src
+
+Jetzt können wir unseren umw_parl code anpassen, damit der filter.sh Skript ausgeführt wird
+
+#+name: umw_parl2
+#+begin_src bash :tangle enterdirres.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad :var bpath=parlaments_pfad :var filterskript=filter_parl
+  userpath='$apath/Walter$bpath'
+  parserpath='$apath/Walter'
+  for dir in $userpath; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $parserpath/$filterskript; done;
+#+end_src
+
+Wir können jetzt die Skripts aktivieren und laufen lassen.
+
+#+begin_src shell :results silent
+  chmod +x filter.sh
+  chmod +x enterdirres.sh
+  sh enterdirres.sh
+#+end_src
+
+* Protokollen
+
+Ein Großteil der Arbeit wurde für die Parlamentsdokumente schon erledigt. Für die Protokollen müssen wir nur noch die vorhandenen Skript anpassen. Zuerst müssen wir die Dateien in den jeweiligen Ordner konvertieren. Es sind XML-Dateien, die wir mit Pandoc konvertieren. Dabei wollen wir zwei Zeilen (<div> und <sp> Zeilen) behalten, weil diese Zeilen Metainformationen enthalten, die wir benutzen werden, um die Dateien in einem späteren Schritt zu zerlegen.
+
+** Vorbereitung und Umwandlung
+
+Wir sind im Arbeitsordner und machen eine Sicherheitskopie vom Ordner XML-Quellen.
+
+#+begin_src shell :results silent :var apath=allgemeiner_pfad
+  cd $apath/Walter
+  cp -a XML-Quellen/. XML-Quellen_KOPIE/
+#+end_src
+
+Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh (siehe unten).
+
+#+begin_src shell :results silent :var apath=allgemeiner_pfad
+  rm -r $apath/Walter/XML-Quellen/19
+#+end_src
+
+Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwandeln und nach TOP zu zerlegen.
+
+#+name: parser_prot
+#+begin_src bash :tangle parsprot.sh :shebang "#!/bin/bash" :noweb=yes
+for i in *.xml; do sed -i 's/<sp /<div /' "$i"; done
+for i in *.xml; do pandoc -f html -t markdown -s "$i" -o ${i%.*}.txt; done
+rm *.xml
+for i in *.txt; do year=$(sed -n '3,5p' "$i" | awk '$8{print $8}') && cp "$i" "$year"_${i%.*}.fina; done
+rm *.txt
+for i in *.fina; do csplit --suppress-matched --prefix ${i%.*} --suffix-format _%03d.txt "$i" '/type=/' '{*}'; done
+rm *.fina
+rm *000_.txt
+find . -type f -size 0b -delete
+#+end_src
+
+Wir gehen dann durch alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien, die wir anschließend nach TOP zerlegen. Dies machen wir mit dem folgenden Skript.
+
+#+name: umw_prot
+#+begin_src bash :tangle enterdir-prot.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad :var bpath=prtokolle_pfad :var parserprot=parser_prot
+  userpath='$apath/Walter$bpath'
+  parserpath='$apath/Walter'
+  for dir in $userpath; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $parserpath/$parserprot; done;
+#+end_src
+
+Wir können jetzt die Skripts aktivieren und laufen lassen.
+
+#+begin_src shell :results silent
+  chmod +x parsprot.sh
+  chmod +x enterdir-prot.sh
+  sh enterdir-prot.sh
+#+end_src
+
+Wir haben jetzt eine Datei je TOP. Wir müssen zuerst diese Dateien nach den relevanten Stichwörtern sortieren, bevor wir sie erneute nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien je Stichwort und dabei benutzen wir den gleichen Skript wie für die Parlamentsdokumente.
+
+#+name: umw_prot2
+#+begin_src bash :tangle enterdir2-prot.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad :var bpath=prtokolle_pfad :var filterprot=filter_parl
+  userpath='$apath/Walter$bpath'
+  parserpath='$apath/Walter'
+  for dir in $userpath; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $parserpath/$filterprot; done;
+#+end_src
+
+Wir aktivieren und führen den Skript enterdir2-prot.sh auf.
+
+#+begin_src bash :results silent
+  chmod +x enterdir2-prot.sh
+  sh enterdir2-prot.sh
+#+end_src
+
+Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Dafür brauchen wir einen neuen Skript für die Zerlegung der Dateien.
+
+#+name: zerleg_prot
+#+begin_src bash :tangle zerleg-prot.sh :shebang "#!/bin/bash" :noweb=yes
+for i in *.txt; do csplit --prefix ${i%.*} --suffix-format _%04d.finc "$i" '/who=/' '{*}'; done
+rm *.txt
+for i in *.finc; do nnp=$(grep "{who=" "$i" | sed 's/" /@/g' | awk -F"@" '{print $1"-"$3"-"$6}' | sed -e 's/"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp "$i" ${i%.*}_"$nnp".txt ; done
+rm *.finc
+for i in *.txt; do sed -i '/^::: /d' "$i"; done
+find . -type f -size 0b -delete
+#+end_src
+
+#+begin_src shell :results silent
+  chmod +x zerleg-prot.sh
+#+end_src
+
+Wir brauchen ebenfalls einen neuen Skript, um in die Ordner zu gehen.
+
+#+name: enterdirprotres
+#+begin_src bash :tangle enterres-prot.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad
+userpath1='$apath/Walter/XML-Quellen/01/*'
+userpath2='$apath/Walter/XML-Quellen/02/*'
+userpath3='$apath/Walter/XML-Quellen/03/*'
+userpath4='$apath/Walter/XML-Quellen/04/*'
+userpath5='$apath/Walter/XML-Quellen/05/*'
+userpath6='$apath/Walter/XML-Quellen/06/*'
+userpath7='$apath/Walter/XML-Quellen/07/*'
+userpath8='$apath/Walter/XML-Quellen/08/*'
+userpath9='$apath/Walter/XML-Quellen/09/*'
+userpath10='$apath/Walter/XML-Quellen/10/*'
+userpath11='$apath/Walter/XML-Quellen/11/*'
+userpath12='$apath/Walter/XML-Quellen/12/*'
+userpath13='$apath/Walter/XML-Quellen/13/*'
+userpath14='$apath/Walter/XML-Quellen/14/*'
+userpath15='$apath/Walter/XML-Quellen/15/*'
+userpath16='$apath/Walter/XML-Quellen/16/*'
+userpath17='$apath/Walter/XML-Quellen/17/*'
+userpath18='$apath/Walter/XML-Quellen/18/*'
+parserpath='$apath/Walter'
+
+for dir in $userpath1; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath2; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath3; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath4; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath5; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath6; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath7; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath8; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath9; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath10; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath11; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath12; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath13; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath14; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath15; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath16; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath17; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+for dir in $userpath18; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and parsing files" && sh $parserpath/zerleg-prot.sh; done;
+#+end_src
+
+Wir führen den Skript aus.
+
+#+begin_src shell :results silent
+  chmod +x enterres-prot.sh
+  sh enterres-prot.sh
+#+end_src
+
+Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. Es sind mehr als 1 Mio. Dateien, die generiert werden. Eine Idee, um die Komplexität zu reduzieren, besteht darin, dass nur die Protokollteile behalten werden, in denen die Stichwörter explizit auftauchen. Dafür soll man zuerst den Ordner mit den Ergebnisdateien kopieren:
+
+#+begin_src shell :results silent
+  cd $apath/Walter
+  cp -a XML-Quellen/. XML-Quellen-OR/
+  mv XML-Quellen XML-Quellen-MR
+#+end_src
+
+Damit haben wir einen Ordner 'XML-Quellen-MR' für 'Mit Rausch' und einen Ordner 'XML-Quellen-OR' für 'Ohne Rausch'. Wir wollen jetzt die Dateien im 'OR' Ordner, die das Stichwort nicht enthalten, löschen.
+
+Wir gehen in diesen Ordner 'XML-Quellen-OR' mit dem Befehl: =cd XML-Quellen-OR=
+Wir gehen in den Subordner 01 mit dem Befehl: =cd 01=
+Wir gehen dann in die jeweiligen Ordner, die die Dateien enthalten -- hier z.B. Forschung_Res: =cd Forschung_Res=
+
+Dort führen wir die folgende Schleife aus: =for x in *.txt; do grep -L 'Transfer' "$x" >> bla.txt; done=
+Wenn die Schleife beendet ist, dann müssen wir die folgende Schleife ausführen: =while IFS= read -r filename; do rm "$filename"; done =< bla.txt=
+Wir löschen ebenfalls die geschriebene Datei bla.txt: rm bla.txt
+
+Dies machen wir mit jedem Ordner, in denen wir unsere Ergebnisse haben, damit die Dateien, die das Stichwort nicht enthalten, gelöscht werden. Entsprechend muss berücksichtigt werden, dass die erste Schleife angepasst werden muss, wenn wir den Ordner wechseln. Wenn wir etwa im Ordner 'Stadt_Res' sind, dann muss die Schleife so aussehen: =for x in *.txt; do grep -L 'Stadt' "$x" >> bla.txt; done=
+
+Dies kann auch in einem Skript geschrieben werden - dies belasse ich als Übung für die Studierenden.
+
+** Ordner 19 -- Anpassung
+
+Für den Ordner 19 müssen die Skripten parsprot.sh und zerleg-prot.sh wie folgt angepasst werden. Dieser Ordner muss entsprechend von den anderen getrennt behandelt werden:
+
+- parsprot.sh, Zeile: =for i in *.txt; do year=$(sed -n '3,5p' "$i" | awk '$8{print $8}') && cp "$i" "$year"_${i%.*}.fina; done=
+
+  ersetzen mit dieser Zeile: =for i in *.txt; do year=$(sed -n '3,5p' "$i" | awk '$5{print $5}') && cp "$i" "$year"_${i%.*}.fina; done=
+
+- zerleg-prot.sh, Zeile: =for i in *.finc; do nnp=$(grep "{who=" "$i" | sed 's/" /@/g' | awk -F"@" '{print $1"-"$3"-"$6}' | sed -e 's/"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp "$i" ${i%.*}_"$nnp".txt ; done=
+
+  ersetzen mit dieser Zeile: =for i in *.finc; do nnp=$(grep "{who=" "$i" | sed 's/" /@/g' | awk -F"@" '{print $1"-"$3"-"$5}' | sed -e 's/"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp "$i" ${i%.*}_"$nnp".txt ; done=
+
+
+Dann kann man die Skripten im Ordner 19 laufen lassen, und anschließend diesen Ordner im Mutterordner 'XML-Quellen-OR' kopieren und von den unerwünschten Dateien entlasten.
