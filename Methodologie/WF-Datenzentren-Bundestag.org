@@ -1,20 +1,20 @@
 * Untersuchung der Protokollen des Bundestages und den Parlamentsdokumenten zum Thema Rechenzentren in Deutschland
 
-Die Protokollen des Bundestages befinden sich an der folgenden Adresse und können als xml-Dateien oder per API heruntergeladen werden: https://www.bundestag.de/services/opendata. Ein Github-Ordner bietet ein R-Objekt hier: https://github.com/benjaminguinaudeau/tidybundestag.
-Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API hier bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
+Die Protokollen des Bundestages können an der folgenden Adresse als xml-Dateien oder per API heruntergeladen werden: https://www.bundestag.de/services/opendata. Ein Github-Konto bietet ein R-Objekt hier an: https://github.com/benjaminguinaudeau/tidybundestag.
+Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API an der folgenden Adresse bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
 
-Beide Datenbanken an Dokumente liefern unterschiedliche Informationen zu den politischen Entscheidungen, die ab 1949 bis heute auf Bundesebene getroffen werden. Diese Grundlage erlaubt eine Rekonstruktion des thematischen Kontextes, in dem die Rechenzentren in Deutschland definiert und problematisiert worden sind. Entsprechend ist eine Untersuchung dieser Datenbanken zum Verständnis der Ausgangslage der Rechenzentren in Deutschland hilfreich. Eine solche Untersuchung wird in diesem Dokument anhand von Topic-Modellen und mit dem MTA-Software vorgenommen.
+Beide Datenbanken liefern unterschiedliche Informationen zu den politischen Entscheidungen, die ab 1949 bis heute auf Bundesebene getroffen werden. Sie erlauben eine Rekonstruktion des thematischen Zusammenhanges, in dem die Rechenzentren in Deutschland definiert und problematisiert wurden. Deshalb ist eine Untersuchung dieser Datenbanken zum Verständnis der Entwicklung von Rechenzentren in Deutschland im Zeitverlauf von Vorteil. Eine solche Untersuchung wird in diesem Dokument anhand von Topic-Modellen und mit dem MTA-Software vorgenommen.
 
 ** Vorgehen
 
-Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schleifen analysiert. Wir arbeiten mit einem LinuxOS bzw. in diesem Fall mit Linux Mint und beziehen wir uns auf die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
+Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schritten modelliert. Wir arbeiten mit einem Linux-Betriebssystem -- in diesem Fall mit Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
 
-Die Struktur der Quelldaten ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
+Die Struktur der Quelldateien ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
 
  - für die Parlamentsdokumente: von *.pdf zu *.txt;
  - für die Protokollen: von *.xml zu *.txt.
 
-Bibliotheken, die dafür notwendig sind bzw. installiert werden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache.
+Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind die Folgenden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache. Zur Interpretation der Ergebnisse der Analyse verwenden wir eine KI auf dem Internet -- in unserem Fall Grok mit der Anwendung tgpt.
 
 ** Dieses Workflow als App benutzen
 
