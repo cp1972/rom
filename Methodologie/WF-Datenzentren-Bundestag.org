@@ -7,86 +7,82 @@ Beide Datenbanken liefern unterschiedliche Informationen zu den politischen Ents
 
 ** Vorgehen
 
-Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schritten modelliert. Wir arbeiten mit einem Linux-Betriebssystem -- in diesem Fall mit Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
+Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schritten modelliert. Wir arbeiten mit einem Linux-Betriebssystem -- in diesem Fall Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
 
-Die Struktur der Quelldateien ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
+Die Struktur der Quelldateien ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente vorhanden. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
 
  - für die Parlamentsdokumente: von *.pdf zu *.txt;
  - für die Protokollen: von *.xml zu *.txt.
 
-Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind die Folgenden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache. Zur Interpretation der Ergebnisse der Analyse verwenden wir eine KI auf dem Internet -- in unserem Fall Grok mit der Anwendung tgpt.
+Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind die Folgenden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache. Zur Interpretation der Ergebnisse der Analyse verwenden wir eine KI auf dem Internet -- in unserem Fall pollinations mit der Anwendung tgpt.
 
 ** Dieses Workflow als App benutzen
 
 Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet:
 
-#+begin_src bash :tangle meth-bundest.sh :shebang "#!/bin/bash"
-emacs --batch \
-      --eval "(require 'org)" \
-      --eval "(setq org-confirm-babel-evaluate nil)" \
-      --eval '(org-babel-tangle-file "WF-Datenzentren-Bundestag.org")'
+#+begin_src shell :results output
+  touch meth-bundest.sh
+  echo "#!/bin/bash" >> meth-bundest.sh
+  echo 'emacs --batch \' >> meth-bundest.sh
+  echo "      --eval \"(require 'org)\" \ " >> meth-bundest.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> meth-bundest.sh
+  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> meth-bundest.sh
+  chmod +x meth-bundest.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke aus, die sich in diesem Dokument befindet. Er wird jedoch die im Rahmen von diesen Blöcken hergestellten Skript nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu tangle.sh hinzugefügt werden (etwa: =sh script.sh=). Ansonsten können die Blöcke in Emacs ausgeführt werden.
+#+RESULTS:
+
+Dieser Skript führt alle Code-Blöcke aus, die sich in diesem Dokument befindet. Er wird jedoch die im Rahmen von diesen Blöcken hergestellten Skript nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu meth-bundest.sh hinzugefügt werden (etwa: =sh script.sh=).
 
 * Parlamentsdokumente
 
 ** Vorbereitung und Umwandlung
 
-Wir definieren den allgemeinen Benutzer-Pfad, wo wir einen Ordner "Walter" herstellen; die Arbeit wird in diesem Ordner stattfindet; der allgemeine Benutzer Pfad muss vom Benutzer angepasst werden.
+Wir gehen davon aus, dass die Ordner mit den Parlamentsdokumenten und Protokollen im Benutzerpfad gespeichert wurden.
+Im Benutzerpfad stellen wir einen Ordner "Results" und einen Ordner "Skripten" her, um unsere Ergebnisse und unsere Skripten zu speichern.
 
-#+name: allgemeiner_pfad
-#+begin_src shell :results silent :noweb=yes :var all_path="/home/cpsoz"
-  echo $all-path
+#+name: benutzer_pfad
+#+begin_src shell :results silent
+  cd ~ && mkdir Results && mkdir Skripten
 #+end_src
 
-#+name: arbeitsordner
-#+begin_src shell :results silent :noweb=yes :var a_path=allgemeiner_pfad
-  cd $a_path
-  mkdir Walter
-#+end_src
-
-Wir definieren Pfade zu den Parlamentsdokumenten und zu den Protokollen.
-
-#+name: parlaments_pfad
-#+begin_src shell :results silent :noweb=yes :var parl_path="/ParlamentsDoc/Parlamentsdokumente_Sozialindex/*"
-  echo $parl_path
-#+end_src
-
-#+name: prtokolle_pfad
-#+begin_src shell :results silent :noweb=yes :var prot_path="/XML-Quellen/*"
-  echo $prot_path
-#+end_src
-
-Wir gehen zum Arbeitsordner und machen eine Sicherheitskopie vom Ordner ParlamentsDoc.
-
-#+begin_src shell :results silent :var apath=allgemeiner_pfad
-  cd $apath/Walter
-  cp -a ParlamentsDoc/. ParlamentsDoc_KOPIE/
-#+end_src
-
-Wir wandeln die *.pdf-Dateien der Parlamentsdokumente um. Zuerst erstellen wir einen bash-Skript, der pdftotext in einer Schleife verwendet, um die *.pdf-Datien umzuwandeln.
-
-#+name: pdftxt_parl
-#+begin_src bash :tangle pdftxt.sh :shebang "#!/bin/bash" :noweb=yes
-  for i in *.pdf; do pdftotext "$i"; done
-#+end_src
-
-Dann brauchen wir einen Skript, der uns zu jedem Ordner bringt, wo wir die Dokumente umwandeln und andere Dateien löschen, die wir für die Analyse nicht brauchen.
-
-#+name: umw_parl
-#+begin_src bash :tangle enterdir.sh :shebang "#!/bin/bash" :noweb=yes :var apath=allgemeiner_pfad :var bpath=parlaments_pfad :var pdfskript=pdftxt_parl
-  userpath='$apath/Walter$bpath'
-  parserpath='$apath/Walter'
-  for dir in $userpath; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $parserpath/$pdfskript && rm *.msg && rm *.docx; done;
-#+end_src
-
-Wir können jetzt die Skripts aktivieren und laufen lassen.
+Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen.
 
 #+begin_src shell :results silent
+  cd ~
+  cp -a ParlamentsDoc/. ParlamentsDoc_KOPIE/
+  cp -a XML-Quellen/. XML-Quellen_KOPIE/
+#+end_src
+
+Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den wir im Ordner "Skripten" speichern.
+
+#+name: pdftxt_parl
+#+begin_src shell
+  touch pdftxt.sh
+  echo "#!/bin/bash" >> pdftxt.sh
+  echo "for i in *.pdf; do pdftotext \"$i\" ; done"  >> pdftxt.sh
   chmod +x pdftxt.sh
+#+end_src
+
+Wir brauchen einen Skript, der uns zu jedem Ordner bringt, wo wir die Dokumente umwandeln und andere Dateien löschen, die wir für die Analyse nicht brauchen.
+
+#+name: umw_parl
+#+begin_src shell
+  touch enterdir.sh
+  echo "#!/bin/bash"
+  echo "userpath='~/ParlamentsDoc/Parlamentsdokumente_Sozialindex/'" >> enterdir.sh
+  echo "parserpath='~/Skripten/'" >> enterdir.sh
+  echo "for dir in $userpath; do [ -d \"$dir\" ] && cd \"$dir\" && echo \"Entering into $dir and converting files\" && bash $parserpath/pdftxt.sh && rm *.msg && rm *.docx; done;" >> enterdir.sh
   chmod +x enterdir.sh
-  sh enterdir.sh
+#+end_src
+
+Wir können jetzt die Umwandlung vornehmen.
+
+#+begin_src shell :results silent
+    mv pdftxt.sh ~/Skripten
+    mv enterdir.sh ~/Skripten
+    cd ~/Skripten
+    sh enterdir.sh
 #+end_src
 
 ** Corpus nach Stichwörtern sortieren
