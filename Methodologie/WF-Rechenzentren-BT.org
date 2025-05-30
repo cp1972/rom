@@ -20,9 +20,7 @@ Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind di
 
 Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet:
 
-
-
-#+begin_src shell :results output
+#+begin_src shell :results silent
   touch tangle.sh
   echo "#!/bin/bash" >> tangle.sh
   echo 'emacs --batch \' >> tangle.sh
@@ -32,15 +30,13 @@ Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. E
   chmod +x tangle.sh
 #+end_src
 
-#+RESULTS:
-
 Dieser Skript führt alle Code-Blöcke aus. Er wird jedoch die hergestellten Skript im Rahmen von diesen Blöcken nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu tangle.sh hinzugefügt werden (etwa: =sh script.sh=). Ansonsten können die Blöcke in Emacs ausgeführt werden.
 
 * Parlamentsdokumente
 
 ** Vorbereitung und Umwandlung
 
-Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen. Wir stellen einen Ordner 'Skripten-Walter' für die Skripten her, die wir brauchen werden.
+Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen. Wir stellen einen Ordner 'Skripten-Rom' für die Skripten her, die wir brauchen werden.
 
 Wir definieren die Pfade zu den PDF- und XML-Dateien.
 
@@ -54,7 +50,7 @@ echo $pdfpath
 echo $xmlpath
 #+end_src
 
-#+begin_src shell :results silent :var xml=xmlpath
+#+begin_src shell :results silent :var xml=xmlpath :eval no
     cd ~
     cp -a ParlamentsDoc/. ParlamentsDoc_KOPIE/
     cp -a $xml/. XML-Quellen_KOPIE/
@@ -82,7 +78,7 @@ Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den 
 Wir wandeln die Dokumente um.
 
 #+name: umw_parl
-#+begin_src shell :results silent :var parl=pdfpath :var skr=skriptenpath
+#+begin_src shell :results silent :var parl=pdfpath :var skr=skriptenpath :eval no
   for dir in $parl; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/pdftxt.sh && rm *.msg && rm *.docx; done;
 #+end_src
 
@@ -124,7 +120,7 @@ Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatie
 Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwandeln und nach TOP zu zerlegen.
 
 #+name: parser_prot
-#+begin_src shell :results silent :var skr=skriptenpath
+#+begin_src shell :results silent :var skr=skriptenpath :eval no
   touch parsprot.sh
   echo "#!/bin/bash" >> parsprot.sh
   echo "for i in *.xml; do sed -i 's/<sp /<div /' \"\$i\"; done" >> parsprot.sh
@@ -143,7 +139,7 @@ Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwande
 Wir gehen dann durch alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien, die wir anschließend nach TOP zerlegen. Dies machen wir mit dem folgenden Skript.
 
 #+name: umw_prot
-#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath
+#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :eval no
   for dir in $xml; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/parsprot.sh; done;
 #+end_src
 
@@ -154,7 +150,7 @@ Wir haben jetzt eine Datei je TOP. Wir müssen zuerst diese Dateien nach den rel
   for dir in $xml; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/filter.sh; done;
 #+end_src
 
-Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Dafür brauchen wir einen neuen Skript für die Zerlegung der Dateien.
+Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Wir brauchen einen neuen Skript für die Zerlegung der Dateien.
 
 #+name: zerleg_prot
 #+begin_src shell :results silent :var skr=skriptenpath
@@ -212,31 +208,31 @@ Wir gehen in diesen Ordner 'XML-Quellen-OR':
 
 Wir gehen in den Subordner 01:
 
-#+begin_src shell :results silent
+#+begin_src shell :results silent :eval no
   cd 01
 #+end_src
 
 Wir gehen dann in die jeweiligen Ordner, die die Dateien enthalten -- hier z.B. Forschung_Res:
 
-#+begin_src shell :results silent
+#+begin_src shell :results silent :eval no
   cd Forschung_Res
 #+end_src
 
 Dort führen wir die folgende Schleife aus:
 
-#+begin_src shell :results silent
+#+begin_src shell :results silent :eval no
   for x in *.txt; do grep -L 'Rechenzentr' "$x" >> bla.txt; done
 #+end_src
 
 Wenn die Schleife beendet ist, dann müssen wir die folgende Schleife ausführen:
 
-#+begin_src shell :results silent
+#+begin_src shell :results silent :eval no
   while IFS= read -r filename; do rm "$filename"; done =< bla.txt
 #+end_src
 
 Wir löschen ebenfalls die geschriebene Datei bla.txt: rm bla.txt
 
-#+begin_src shell :results silent
+#+begin_src shell :results silent :eval no
   rm bla.txt
 #+end_src
 
