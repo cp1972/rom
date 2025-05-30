@@ -41,12 +41,12 @@ Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Que
 Wir definieren die Pfade zu den PDF- und XML-Dateien.
 
 #+name pdfpath
-#+begin_src shell :results silent :var pdfpath="~/ParlamentsDoc/Parlamentsdokumente_Sozialindex"
+#+begin_src shell :results silent :var pdfpath="~/ROM-Data/ParlamentsDoc/Parlamentsdokumente_Sozialindex"
 echo $pdfpath
 #+end_src
 
 #+name xmlpath
-#+begin_src shell :results silent :var xmlpath="~/XML-Quellen"
+#+begin_src shell :results silent :var xmlpath="~/ROM-Data/XML-Quellen"
 echo $xmlpath
 #+end_src
 
@@ -60,7 +60,7 @@ echo $xmlpath
 Wir behalten den Pfad zum Skripten-Ordner in einer Variable 'skriptenpath'
 
 #+name skriptenpath
-#+begin_src shell :results silent :var skriptenpath="~/Skripten-Rom"
+#+begin_src shell :results silent :var skriptenpath="~/RM-Data/Skripten-Rom"
 echo $skriptenpath
 #+end_src
 
