@@ -122,57 +122,67 @@ Ein Großteil der Arbeit wurde für die Parlamentsdokumente schon erledigt. Für
 
 Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh (siehe unten).
 
-#+begin_src shell :results silent :var xml=xmlpath
-  rm -r $xml/19
+#+begin_src shell :results silent :var xml=xmlpath :var user=user-path
+  rm -r $user/$xml/19
 #+end_src
 
 Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwandeln und nach TOP zu zerlegen.
 
 #+name: parser_prot
-#+begin_src shell :results silent :var skr=skriptenpath :eval no
-  touch parsprot.sh
-  echo "#!/bin/bash" >> parsprot.sh
-  echo "for i in *.xml; do sed -i 's/<sp /<div /' \"\$i\"; done" >> parsprot.sh
-  echo "for i in *.xml; do pandoc -f html -t markdown -s \"\$i\" -o \${i%.*}.txt; done" >> parsprot.sh
-  echo "rm *.xml" >> parsprot.sh
-  echo "for i in *.txt; do year=\$(sed -n '3,5p' \"\$i\" | awk '\$8{print \$8}') && cp \"\$i\" \"\$year\"_\${i%.*}.fina; done" >> parsprot.sh
-  echo "rm *.txt" >> parsprot.sh
-  echo "for i in *.fina; do csplit --suppress-matched --prefix \${i%.*} --suffix-format _%03d.txt \"\$i\" '/type=/' '{*}'; done"  >> parsprot.sh
-  echo "rm *.fina" >> parsprot.sh
-  echo "rm *000_.txt" >> parsprot.sh
-  echo "find . -type f -size 0b -delete" >> parsprot.sh
-  chmod +x parsprot.sh
-  mv parsprot.sh $skr
+#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath :eval no
+  touch $user/parsprot.sh
+  echo "#!/bin/bash" >> $user/parsprot.sh
+  echo "for i in *.xml; do sed -i 's/<sp /<div /' \"\$i\"; done" >> $user/parsprot.sh
+  echo "for i in *.xml; do pandoc -f html -t markdown -s \"\$i\" -o \${i%.*}.txt; done" >> $user/parsprot.sh
+  echo "rm *.xml" >> $user/parsprot.sh
+  echo "for i in *.txt; do year=\$(sed -n '3,5p' \"\$i\" | awk '\$8{print \$8}') && cp \"\$i\" \"\$year\"_\${i%.*}.fina; done" >> $user/parsprot.sh
+  echo "rm *.txt" >> $user/parsprot.sh
+  echo "for i in *.fina; do csplit --suppress-matched --prefix \${i%.*} --suffix-format _%03d.txt \"\$i\" '/type=/' '{*}'; done"  >> $user/parsprot.sh
+  echo "rm *.fina" >> $user/parsprot.sh
+  echo "rm *000_.txt" >> $user/parsprot.sh
+  echo "find . -type f -size 0b -delete" >> $user/parsprot.sh
+  chmod +x $user/parsprot.sh
+  mv $user/parsprot.sh $user/$skr
 #+end_src
 
 Wir gehen dann durch alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien, die wir anschließend nach TOP zerlegen. Dies machen wir mit dem folgenden Skript.
 
 #+name: umw_prot
-#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :eval no
-  for dir in $xml; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/parsprot.sh; done;
+#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path :eval no
+  for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/parsprot.sh; done;
 #+end_src
 
 Wir haben jetzt eine Datei je TOP. Wir müssen zuerst diese Dateien nach den relevanten Stichwörtern sortieren, bevor wir sie erneute nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien je Stichwort und dabei benutzen wir den gleichen Skript wie für die Parlamentsdokumente.
 
 #+name: umw_prot2
-#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath
-  for dir in $xml; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/filter.sh; done;
+#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path
+  for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/filter.sh; done;
 #+end_src
+
+Jetzt kopieren wir die
 
 Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Wir brauchen einen neuen Skript für die Zerlegung der Dateien.
 
 #+name: zerleg_prot
-#+begin_src shell :results silent :var skr=skriptenpath
-  touch zerleg-prot.sh
-  echo "#!/bin/bash" >> zerleg-prot.sh
-  echo "for i in *.txt; do csplit --prefix \${i%.*} --suffix-format _%04d.finc \"\$i\" '/who=/' '{*}'; done" >> zerleg-prot.sh
-  echo "rm *.txt" >> zerleg-prot.sh
-  echo "for i in *.finc; do nnp=\$(grep \"{who=\" \"$i\" | sed 's/\" /@/g' | awk -F\"@\" '{print \$1\"-\"\$3\"-\"\$6}' | sed -e 's/\"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp \"\$i\" \${i%.*}_\"\$nnp\".txt ; done" >> zerleg-prot.sh
-  echo "rm *.finc" >> zerleg-prot.sh
-  echo "for i in *.txt; do sed -i '/^::: /d' \"\$i\"; done" >> zerleg-prot.sh
-  echo "find . -type f -size 0b -delete" >> zerleg-prot.sh
-  chmod +x zerleg-prot.sh
-  mv zerleg-prot.sh $skr
+#+begin_src shell :results silent :var skr=skriptenpath :var user=user-path
+  touch $user/zerleg-prot.sh
+  echo "#!/bin/bash" >> $user/zerleg-prot.sh
+  echo "for i in *.txt; do csplit --prefix \${i%.*} --suffix-format _%04d.finc \"\$i\" '/who=/' '{*}'; done" >> $user/zerleg-prot.sh
+  echo "rm *.txt" >> $user/zerleg-prot.sh
+  echo "for i in *.finc; do nnp=\$(grep \"{who=\" \"$i\" | sed 's/\" /@/g' | awk -F\"@\" '{print \$1\"-\"\$3\"-\"\$6}' | sed -e 's/\"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp \"\$i\" \${i%.*}_\"\$nnp\".txt ; done" >> $user/zerleg-prot.sh
+  echo "rm *.finc" >> $user/zerleg-prot.sh
+  echo "for i in *.txt; do sed -i '/^::: /d' \"\$i\"; done" >> $user/zerleg-prot.sh
+  echo "find . -type f -size 0b -delete" >> $user/zerleg-prot.sh
+  chmod +x $user/zerleg-prot.sh
+  mv $user/zerleg-prot.sh $user/$skr
+#+end_src
+
+Wir stellen dann einen Ordner 'XML-Results' und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
+
+#+name: zerleg_prot
+#+begin_src shell :results silent :var xml=xmlpath :var user=user-path
+  cd $user && mkdir $user/XML-Results
+  for dir in $user/$xml/*; do cp -rp "$dir"/Rechenzentr_res $user/XML-Results/; done
 #+end_src
 
 Wir brauchen ebenfalls einen neuen Skript, um in die Ordner zu gehen.
