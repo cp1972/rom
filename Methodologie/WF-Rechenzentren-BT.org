@@ -18,16 +18,25 @@ Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind di
 
 ** Dieses Workflow als App benutzen
 
-Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet:
+Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet.
 
-#+begin_src shell :results silent
-  touch tangle.sh
-  echo "#!/bin/bash" >> tangle.sh
-  echo 'emacs --batch \' >> tangle.sh
-  echo "      --eval \"(require 'org)\" \ " >> tangle.sh
-  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> tangle.sh
-  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> tangle.sh
-  chmod +x tangle.sh
+Zuerst stellen wir eine Variable für den Pfad zum Arbeitsordner her:
+
+#+name: user-path
+#+begin_src shell :var userpath="/home/cpsoz/ROM-Data" :results silent
+echo $userpath
+#+end_src
+
+Dann schreiben wir den Skript:
+
+#+begin_src shell :results silent :var user=user-path
+  touch $user/tangle.sh
+  echo "#!/bin/bash" >> $user/tangle.sh
+  echo 'emacs --batch \' >> $user/tangle.sh
+  echo "      --eval \"(require 'org)\" \ " >> $user/tangle.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tangle.sh
+  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> $user/tangle.sh
+  chmod +x $user/tangle.sh
 #+end_src
 
 Dieser Skript führt alle Code-Blöcke aus. Er wird jedoch die hergestellten Skript im Rahmen von diesen Blöcken nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu tangle.sh hinzugefügt werden (etwa: =sh script.sh=). Ansonsten können die Blöcke in Emacs ausgeführt werden.
@@ -40,46 +49,46 @@ Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Que
 
 Wir definieren die Pfade zu den PDF- und XML-Dateien.
 
-#+name pdfpath
-#+begin_src shell :results silent :var pdfpath="~/ROM-Data/ParlamentsDoc/Parlamentsdokumente_Sozialindex"
+#+name: pdfpath
+#+begin_src shell :results silent :var pdfpath="/ParlamentsDoc/Parlamentsdokumente_Sozialindex"
 echo $pdfpath
 #+end_src
 
-#+name xmlpath
-#+begin_src shell :results silent :var xmlpath="~/ROM-Data/XML-Quellen"
+#+name: xmlpath
+#+begin_src shell :results silent :var xmlpath="/XML-Quellen"
 echo $xmlpath
 #+end_src
 
-#+begin_src shell :results silent :var xml=xmlpath :eval no
-    cd ~
-    cp -a ParlamentsDoc/. ParlamentsDoc_KOPIE/
-    cp -a $xml/. XML-Quellen_KOPIE/
-    mkdir Skripten-Rom
+#+begin_src shell :results silent :var xml=xmlpath :var user=user-path :eval no
+    cd $user
+    cp -a $user/ParlamentsDoc/. $user/ParlamentsDoc_KOPIE/
+    cp -a $user/$xml/. XML-Quellen_KOPIE/
+    mkdir $user/Skripten-Rom
 #+end_src
 
 Wir behalten den Pfad zum Skripten-Ordner in einer Variable 'skriptenpath'
 
-#+name skriptenpath
-#+begin_src shell :results silent :var skriptenpath="~/RM-Data/Skripten-Rom"
+#+name: skriptenpath
+#+begin_src shell :results silent :var skriptenpath="/Skripten-Rom"
 echo $skriptenpath
 #+end_src
 
 Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den wir im Ordner "Skripten-Walter" speichern.
 
 #+name: pdftxt_parl
-#+begin_src shell :results silent :var skr=skriptenpath
-  touch pdftxt.sh
-  echo "#!/bin/bash" >> pdftxt.sh
-  echo "for i in *.pdf; do pdftotext \"\$i\" ; done"  >> pdftxt.sh
-  chmod +x pdftxt.sh
-  mv pdftxt.sh $skr
+#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
+  touch $user/pdftxt.sh
+  echo "#!/bin/bash" >> $user/pdftxt.sh
+  echo "for i in *.pdf; do pdftotext \"\$i\" ; done"  >> $user/pdftxt.sh
+  chmod +x $user/pdftxt.sh
+  mv $user/pdftxt.sh $user/$skr
 #+end_src
 
 Wir wandeln die Dokumente um.
 
 #+name: umw_parl
-#+begin_src shell :results silent :var parl=pdfpath :var skr=skriptenpath :eval no
-  for dir in $parl; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/pdftxt.sh && rm *.msg && rm *.docx; done;
+#+begin_src shell :results silent :var user=user-path :var parl=pdfpath :var skr=skriptenpath :eval no
+  for dir in $user/$parl/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/pdftxt.sh && rm *.msg && rm *.docx; done;
 #+end_src
 
 ** Corpus nach Stichwörtern sortieren
@@ -89,20 +98,20 @@ In einem zweiten Schritt wollen wir die konvertierten Dateien nach Stichwörtern
 Der erste Skript sieht wie umw_parl aus, aber er muss einen anderen skript laufen lassen, den wir filter.sh benennen und der die folgenden Zeilen enthält:
 
 #+name: filter_parl
-#+begin_src shell :results silent :var skr=skriptenpath
-  touch filter.sh
-  echo "#!/bin/bash" >> filter.sh
-  echo "words=( \"Rechenzentr\" )" >> filter.sh
-  echo "for i in \"\${words[@]}\"; do grep \"\$i\" *.* | awk -F: '{print \$1}' | uniq > \"\$i\".txt && mkdir \"\$i\"_res && cp \$(<\"\$i\".txt) \"\$i\"_res && rm \"\$i\".txt; done" >> filter.sh
-  chmod +x filter.sh
-  mv filter.sh $skr
+#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
+  touch $user/filter.sh
+  echo "#!/bin/bash" >> $user/filter.sh
+  echo "words=( \"Rechenzentr\" )" >> $user/filter.sh
+  echo "for i in \"\${words[@]}\"; do grep \"\$i\" * | awk -F: '{print \$1}' | uniq > \"\$i\".txt && mkdir \"\$i\"_res && cp \$(<\"\$i\".txt) \"\$i\"_res && rm \"\$i\".txt; done" >> $user/filter.sh
+  chmod +x $user/filter.sh
+  mv $user/filter.sh $user/$skr
 #+end_src
 
 Jetzt können wir unseren umw_parl code anpassen, damit der filter.sh Skript ausgeführt wird
 
 #+name: umw_parl2
-#+begin_src shell :results silent :var parl=pdfpath :var skr=skriptenpath
-  for dir in $parl; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $skr/filter.sh && rm *.msg && rm *.docx; done;
+#+begin_src shell :results silent :var user=user-path :var parl=pdfpath :var skr=skriptenpath
+  for dir in $user/$parl/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/filter.sh && rm *.msg && rm *.docx; done;
 #+end_src
 
 * Protokollen
