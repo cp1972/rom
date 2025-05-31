@@ -165,21 +165,22 @@ Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern ze
 
 #+name: zerleg_prot
 #+begin_src shell :results silent :var skr=skriptenpath :var user=user-path
-  touch $user/zerleg-prot.sh
-  echo "#!/bin/bash" >> $user/zerleg-prot.sh
-  echo "for i in *.txt; do csplit --prefix \${i%.*} --suffix-format _%04d.finc \"\$i\" '/who=/' '{*}'; done" >> $user/zerleg-prot.sh
-  echo "rm *.txt" >> $user/zerleg-prot.sh
-  echo "for i in *.finc; do nnp=\$(grep \"{who=\" \"\$i\" | sed 's/\" /@/g' | awk -F\"@\" '{print \$1\"-\"\$3\"-\"\$6}' | sed -e 's/\"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp \"\$i\" \${i%.*}_\"\$nnp\".txt ; done" >> $user/zerleg-prot.sh
-  echo "rm *.finc" >> $user/zerleg-prot.sh
-  echo "for i in *.txt; do sed -i '/^::: /d' \"\$i\"; done" >> $user/zerleg-prot.sh
-  echo "find . -type f -size 0b -delete" >> $user/zerleg-prot.sh
-  chmod +x $user/zerleg-prot.sh
-  mv $user/zerleg-prot.sh $user/$skr
+      touch $user/zerleg-prot.sh
+      echo "#!/bin/bash" >> $user/zerleg-prot.sh
+      echo "for i in *.txt; do csplit --prefix \${i%.*} --suffix-format _%04d.finc \"\$i\" '/who=/' '{*}'; done" >> $user/zerleg-prot.sh
+      echo "rm *.txt" >> $user/zerleg-prot.sh
+      echo "find . -type f -size 0b -delete" >> $user/zerleg-prot.sh
+      echo "for i in *.finc; do nnp=\$(grep \"{who=\" \"\$i\" | sed 's/\" /@/g' | awk -F\"@\" '{print \$1\"-\"\$3\"-\"\$6}' | sed -e 's/\"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g'); done"  >> $user/zerleg-prot.sh
+      echo "for i in *.finc; do cp \"\$i\" \${i%.*}_\"\$nnp\".txt ; done" >> $user/zerleg-prot.sh
+      echo "rm *.finc" >> $user/zerleg-prot.sh
+      echo "for i in *.txt; do sed -i '/^::: /d' \"\$i\"; done" >> $user/zerleg-prot.sh
+      chmod +x $user/zerleg-prot.sh
+      mv $user/zerleg-prot.sh $user/$skr
 #+end_src
 
 Wir stellen dann einen Ordner 'XML-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
 
-#+name: zerleg_prot
+#+name: zerleg_results
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path
   cd $user && mkdir $user/XML-Results
   for dir in $user/$xml/*; do cp -rp "$dir"/Rechenzentr_res $user/XML-Results/; done
@@ -190,7 +191,7 @@ Wir brauchen ebenfalls einen neuen Skript, um in den Ordner 'XML-Results/Rechenz
 #+name: enterdirprotres
 #+begin_src shell :results none :var user=user-path :var skr=skriptenpath
   cd $user/XML-Results/Rechenzentr_res
-  for i in *.txt; do sh $user/$skr/zerleg-prot.sh; done
+  sh $user/$skr/zerleg-prot.sh
 #+end_src
 
 Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. Es sind mehr als 1 Mio. Dateien, die generiert werden. Eine Idee, um die Komplexität zu reduzieren, besteht darin, dass nur die Protokollteile beibehalten werden, in denen die Stichwörter explizit erwähnt werden. Dafür soll man zuerst den Ordner mit den Ergebnisdateien kopieren:
