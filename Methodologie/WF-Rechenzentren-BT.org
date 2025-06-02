@@ -1,4 +1,4 @@
-* Untersuchung der Protokollen des Bundestages und den Parlamentsdokumenten zum Thema Rechenzentren in Deutschland
+* Parlamentsdokumente und Protokollen des Bundestages zum Thema Rechenzentren in Deutschland
 
 Die Protokollen des Bundestages können an der folgenden Adresse als xml-Dateien oder per API heruntergeladen werden: https://www.bundestag.de/services/opendata. Ein Github-Konto bietet ein R-Objekt hier an: https://github.com/benjaminguinaudeau/tidybundestag.
 Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API an der folgenden Adresse bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
@@ -200,11 +200,40 @@ Wir brauchen ebenfalls einen neuen Skript, um in den Ordner 'XML-Results/Rechenz
   sh $user/$skr/zerleg-prot.sh
 #+end_src
 
-Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden gruppieren werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln. In einem ersten Schritt kopieren wir den Ordner 19 aus der Kopie der XML-Quellen; in einem zweiten Schritt filtern wir die Dateien im Ordner 19 mit unserem filter-Skript:
+Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden gruppieren werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln.
 
-#+begin_src shell :results silent :var xml=xmlpath :var user=user-path :var skr=skriptenpath
+** Behandlung des Ordners 19
+
+In einem ersten Schritt kopieren wir den Ordner 19 aus der Kopie der XML-Quellen zum Benutzerpfad:
+
+#+begin_src shell :results silent :var user=user-path
   cp -r $user/XML-Quellen_KOPIE/19 $user/
-  cd $user/19 && bash $user/$skr/filter.sh
+#+end_src
+
+Wir schreiben eine veränderte Version von unserem Parser, um die richtige Position vom Jahr in den XML-Dateien zu treffen:
+
+#+name: parser19_prot
+#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath :eval no
+  touch $user/parsprot19.sh
+  echo "#!/bin/bash" >> $user/parsprot19.sh
+  echo "for i in *.xml; do sed -i 's/<sp /<div /' \"\$i\"; done" >> $user/parsprot19.sh
+  echo "for i in *.xml; do pandoc -f html -t markdown -s \"\$i\" -o \${i%.*}.txt; done" >> $user/parsprot19.sh
+  echo "rm *.xml" >> $user/parsprot19.sh
+  echo "for i in *.txt; do year=\$(sed -n '3,5p' \"\$i\" | awk '\$5{print \$5}') && cp \"\$i\" \"\$year\"_\${i%.*}.fina; done" >> $user/parsprot19.sh
+  echo "rm *.txt" >> $user/parsprot19.sh
+  echo "for i in *.fina; do csplit --suppress-matched --prefix \${i%.*} --suffix-format _%03d.txt \"\$i\" '/type=/' '{*}'; done"  >> $user/parsprot19.sh
+  echo "rm *.fina" >> $user/parsprot19.sh
+  echo "rm *000_.txt" >> $user/parsprot19.sh
+  echo "find . -type f -size 0b -delete" >> $user/parsprot19.sh
+  chmod +x $user/parsprot19.sh
+  mv $user/parsprot19.sh $user/$skr
+#+end_src
+
+Wir konvertieren dann die Dateien in diesem Ordner und wir sortieren sie nach Anwesenheit von unserem Stichwort 'Rechenzentr':
+
+#+name: umw_prot
+#+begin_src shell :results silent :var skr=skriptenpath :var user=user-path :eval no
+  cd $user/19 && bash $user/$skr/parsprot19.sh && bash $user/$skr/filter.sh
 #+end_src
 
 Wir stellen dann einen Ordner '19-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
@@ -238,97 +267,3 @@ Jetzt können wir mit diesem Skript die Dokumente im Ordner '19-Results' zerlege
   cd $user/19-Results
   sh $user/$skr/zerleg19-prot.sh
 #+end_src
-
-Damit haben wir einen Ordner 'XML-Quellen-MR' für 'Mit Rausch' und einen Ordner 'XML-Quellen-OR' für 'Ohne Rausch'. Wir wollen jetzt die Dateien im 'OR' Ordner, die das Stichwort nicht enthalten, löschen.
-
-Wir gehen in diesen Ordner 'XML-Quellen-OR':
-
-#+begin_src shell :results silent :var xml=xmlpath
-  cd $xml/XML-Quellen-OR/
-#+end_src
-
-Wir gehen in den Subordner 01:
-
-#+begin_src shell :results silent :eval no
-  cd 01
-#+end_src
-
-Wir gehen dann in die jeweiligen Ordner, die die Dateien enthalten -- hier z.B. Forschung_Res:
-
-#+begin_src shell :results silent :eval no
-  cd Forschung_Res
-#+end_src
-
-Dort führen wir die folgende Schleife aus:
-
-#+begin_src shell :results silent :eval no
-  for x in *.txt; do grep -L 'Rechenzentr' "$x" >> bla.txt; done
-#+end_src
-
-Wenn die Schleife beendet ist, dann müssen wir die folgende Schleife ausführen:
-
-#+begin_src shell :results silent :eval no
-  while IFS= read -r filename; do rm "$filename"; done =< bla.txt
-#+end_src
-
-Wir löschen ebenfalls die geschriebene Datei bla.txt: rm bla.txt
-
-#+begin_src shell :results silent :eval no
-  rm bla.txt
-#+end_src
-
-Dies machen wir mit jedem Ordner, in denen wir unsere Ergebnisse haben, damit die Dateien, die das Stichwort nicht enthalten, gelöscht werden. Entsprechend muss berücksichtigt werden, dass die erste Schleife angepasst werden muss, wenn wir den Ordner wechseln. Wenn wir etwa im Ordner 'Stadt_Res' sind, dann muss die Schleife so aussehen: =for x in *.txt; do grep -L 'Stadt' "$x" >> bla.txt; done=
-
-Wir können das Verfahren wie folgt automatisieren.
-
-Zuerst machen wir einen Skript je Ordner mit dem richtigen Stichwort für die For-Schleife:
-
-#+name forloopres
-#+begin_src shell :results silent :var skr=skriptenpath
-  touch forsrech.sh
-  echo "#!/bin/bash" >> forsrech.sh
-  echo "for x in *.txt; do grep -L 'Rechenzentr' \"\$x\" >> bla.txt; done" >> forsrech.sh
-  echo "while IFS= read -r filename; do rm \"\$filename\"; done =< bla.txt" >> forsrech.sh
-  echo "rm bla.txt"
-  chmod +x forsrech.sh
-  mv forsrech.sh $skr
-#+end_src
-
-Dann können wir zu jedem Unterordner gehen und die Dateien reinigen -- hier ein Beispiel für die zwei ersten Ordner (der Block kann für die anderen Ordner vervollständigt werden):
-
-#+name: cleanres
-#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath
-  cd $xml/01/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/02/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/03/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/04/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/05/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/06/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/07/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/08/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/09/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/10/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/11/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/12/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/13/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/14/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/15/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/16/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/17/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/18/Rechenzentr_Res && $skr/forsrech.sh
-  cd $xml/19/Rechenzentr_Res && $skr/forsrech.sh
-#+end_src
-
-** Ordner 19 -- Anpassung
-
-Für den Ordner 19 müssen die Skripten parsprot.sh und zerleg-prot.sh wie folgt angepasst werden. Dieser Ordner muss entsprechend von den anderen getrennt behandelt werden:
-
-- parsprot.sh, Zeile: =for i in *.txt; do year=$(sed -n '3,5p' "$i" | awk '$8{print $8}') && cp "$i" "$year"_${i%.*}.fina; done=
-
-  ersetzen mit dieser Zeile: =for i in *.txt; do year=$(sed -n '3,5p' "$i" | awk '$5{print $5}') && cp "$i" "$year"_${i%.*}.fina; done=
-
-- zerleg-prot.sh, Zeile: =for i in *.finc; do nnp=$(grep "{who=" "$i" | sed 's/" /@/g' | awk -F"@" '{print $1"-"$3"-"$6}' | sed -e 's/"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp "$i" ${i%.*}_"$nnp".txt ; done=
-
-  ersetzen mit dieser Zeile: =for i in *.finc; do nnp=$(grep "{who=" "$i" | sed 's/" /@/g' | awk -F"@" '{print $1"-"$3"-"$5}' | sed -e 's/"//g' -e 's/{//g' -e 's/=//g' -e 's/who//g' -e 's/role//g' -e 's/party//g' -e 's/^::: //g' | sed 's/ //g') && cp "$i" ${i%.*}_"$nnp".txt ; done=
-
-Dann kann man die Skripten im Ordner 19 laufen lassen, und anschließend diesen Ordner im Mutterordner 'XML-Quellen-OR' kopieren und von den unerwünschten Dateien entlasten.
