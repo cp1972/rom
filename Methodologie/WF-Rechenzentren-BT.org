@@ -277,4 +277,22 @@ Jetzt können wir mit diesem Skript die Dokumente im Ordner '19-Results' zerlege
 
 ** Fehlende Protokolle hinzufügen
 
-Im
+In unserer Version der Protokollen des Bundestages gehen die Dateien von 1949 bis zum 17.05.2023. Die weiteren Protokollen haben wir mit Verwendung der Suchmaschine auf der Webseite des Bundestages als XML-Dateien handwerklich heruntergeladen und in *.txt-Dateien umgewandelt. Die Suche mit der Suchmaschine ergibt die Dateien mit den spezifischen Passagen aus den Protokollen, die das Stichwort "Rechenzentr" enthalten, weshalb wir keine volle Protokollen heruntergeladen haben, sondern die Ergebnisdokumente mit den betreffenden Stellen. Diese Dateien sind Fragen an den Bundestag, Antworten vom Bundestag, Unterrichtungen, Berichte, Gesetzentwürfe, Beschlussempfehlungen, Entschliessungsanträge, die keine besondere tags enthalten.
+
+Wir speichern diese Dateien in einem Ordner 'ROM-Data-2023-2025' für die Zeit der Erfassung der Protokollen (Juni 2025), und diesen Ordner kopieren wir in unseren Arbeitsordner:
+
+#+name: data23-25
+#+begin_src shell :var user=user-path :results silent
+cp -r /home/cpsoz/ROM-Data-2023-2025 $user
+#+end_src
+
+Wir wandeln die *.xml-Dateien in *.txt-Dateien:
+
+#+name: umw-data2325
+#+begin_src shell :var user=user-path
+  cd $user/ROM-Data-2023-2025
+  for i in *.xml; do pandoc -f html -t markdown -s "$i" -o ${i%.*}.txt; done
+  rm *.xml
+#+end_src
+
+#+RESULTS: umw-data2325
