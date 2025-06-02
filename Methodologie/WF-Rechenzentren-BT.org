@@ -1,51 +1,56 @@
-* Parlamentsdokumente und Protokollen des Bundestages zum Thema Rechenzentren in Deutschland
+* Herstellung eines Datensatzes mit den Parlamentsdokumenten und Protokollen des Bundestages zum Thema Rechenzentren in Deutschland
 
-Die Protokollen des Bundestages können an der folgenden Adresse als xml-Dateien oder per API heruntergeladen werden: https://www.bundestag.de/services/opendata. Ein Github-Konto bietet ein R-Objekt hier an: https://github.com/benjaminguinaudeau/tidybundestag.
+Dieses Dokument stellt ein Workflow dar, das Dokumente in Text-Dateien umwandelt und in mehreren Schritten umbenannt, sortiert und zerlegt. Wir arbeiten mit einem Linux-Betriebssystem -- in der Zeit des Schreibens ist es Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows-Benutzer die Installation von WSL2.
+
+Die Dokumente sind Parlamentsdokumente der Bundesrepublik Deutschland und Protokollen des Bundestages. Diese Dokumente können an der folgenden Adresse als xml-Dateien, mit einer API oder nach handwerklicher Suche heruntergeladen werden: https://www.bundestag.de/services/opendata.
+Ein Github-Konto bietet ein R-Objekt hier an: https://github.com/benjaminguinaudeau/tidybundestag.
 Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API an der folgenden Adresse bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
 
-Beide Datenbanken liefern unterschiedliche Informationen zu den politischen Entscheidungen, die ab 1949 bis heute auf Bundesebene getroffen werden. Sie erlauben eine Rekonstruktion des thematischen Zusammenhanges, in dem die Rechenzentren in Deutschland definiert und problematisiert wurden. Deshalb ist eine Untersuchung dieser Datenbanken zum Verständnis der Entwicklung von Rechenzentren in Deutschland im Zeitverlauf von Vorteil. Eine solche Untersuchung wird in diesem Dokument anhand von Topic-Modellen und mit dem MTA-Software vorgenommen.
+Mit diesen Dokumenten können Datensätze hergestellt werden, die maschinell untersucht werden können. Inhaltlich liefern diese Dokumente unterschiedliche Informationen zu den politischen Entscheidungen, die von 1949 bis heute auf Bundesebene getroffen werden. Bezogen auf das Thema des Vorhabens in dieser Arbeit erlauben sie eine Rekonstruktion des thematischen Zusammenhanges, in dem die Rechenzentren in Deutschland definiert und problematisiert wurden. Deshalb ist eine Untersuchung dieser Datenbanken zum Verständnis der Entwicklung von Rechenzentren in Deutschland und der Herausforderungen, die damit verbunden sind, vorteilhaft.
+
+Dieses Workflow beschreibt die Stufen zum Aufbau eines solchen Datensatzes und kann als Anwendung verwendet werden (s. u.).
 
 ** Vorgehen
 
-Dieses Dokument beschreibt ein Workflow, das die Dokumente in Text-Dateien umwandelt und in mehreren Schritten modelliert. Wir arbeiten mit einem Linux-Betriebssystem -- in diesem Fall Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows Benutzer die Installation von WSL.
-
-Die Struktur der Quelldateien ist im JSON oder XML Format für die Protokollen und in PDF Format für die Parlamentsdokumente vorhanden. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
+Die Quelldateien sind im JSON oder XML Format für die Protokollen sowie in PDF Format für die Parlamentsdokumente verfügbar. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
 
  - für die Parlamentsdokumente: von *.pdf zu *.txt;
  - für die Protokollen: von *.xml zu *.txt.
 
-Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind die Folgenden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir Python3.x in Verbindung mit dem Software MTA sowie gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache. Zur Interpretation der Ergebnisse der Analyse verwenden wir eine KI auf dem Internet -- in unserem Fall pollinations mit der Anwendung tgpt.
+Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind die Folgenden: pandoc, poppler-utils. Weiter in diesem Workflow verwenden wir gewöhnliche Bash-Anwendungen (grep, sed, awk, csplit) und die Syntax-Elemente der Bash-Programmiersprache, um die Dateien umzubenennen, zu sortieren und zu zerlegen.
 
-** Dieses Workflow als App benutzen
+** Dieses Workflow als Anwendung benutzen
 
-Dieses Workflow bzw. dieses Dokument kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit dem Programm Org-mode. Dann kann dieses Workflow auf der Kommandozeile mit dem folgenden Skript meth-bundest.sh ausgeführt werden. Ein solcher Skript wird bei der Evaluation vom folgenden Code-Block dort hergestellt, wo sich der Benutzer befindet.
-
-Zuerst stellen wir eine Variable für den Pfad zum Arbeitsordner her:
+Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode im Texteditor und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'datab-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
 
 #+name: user-path
 #+begin_src shell :var userpath="/home/cpsoz/ROM-Data" :results silent
 echo $userpath
 #+end_src
 
-Dann schreiben wir den Skript:
+Pfade müssen von Benutzern des Workflows angepasst werden -- statt /home/cpsoz/ROM-Data kann ein anderer Pfad definiert werden.
+
+Dann schreiben wir den 'datab-rech.sh' Skript:
 
 #+begin_src shell :results silent :var user=user-path
-  touch $user/tangle.sh
-  echo "#!/bin/bash" >> $user/tangle.sh
-  echo 'emacs --batch \' >> $user/tangle.sh
-  echo "      --eval \"(require 'org)\" \ " >> $user/tangle.sh
-  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tangle.sh
-  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> $user/tangle.sh
-  chmod +x $user/tangle.sh
+  touch $user/datab-rech.sh
+  echo "#!/bin/bash" >> $user/datab-rech.sh
+  echo 'emacs --batch \' >> $user/datab-rech.sh
+  echo "      --eval \"(require 'org)\" \ " >> $user/datab-rech.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/datab-rech.sh
+  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> $user/datab-rech.sh
+  chmod +x $user/datab-rech.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke aus. Er wird jedoch die hergestellten Skript im Rahmen von diesen Blöcken nicht ausführen. Wenn das erwünscht ist, dann sollten die Skripts zu tangle.sh hinzugefügt werden (etwa: =sh script.sh=). Ansonsten können die Blöcke in Emacs ausgeführt werden.
+Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, etwa: bash datab-rech.sh
+
+Zuerst behandeln wir die Parlamentsdokumente.
 
 * Parlamentsdokumente
 
 ** Vorbereitung und Umwandlung
 
-Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen. Wir stellen einen Ordner 'Skripten-Rom' für die Skripten her, die wir brauchen werden.
+Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen bzw. von den Protokollen des Bundestages. Wir stellen einen Ordner 'Skripten-Rom' für die Skripten her, die wir im Laufe des Workflow produzieren werden.
 
 Wir definieren die Pfade zu den PDF- und XML-Dateien.
 
@@ -58,6 +63,8 @@ echo $pdfpath
 #+begin_src shell :results silent :var xmlpath="/XML-Quellen"
 echo $xmlpath
 #+end_src
+
+Wir machen eine Kopie der Quelldateien.
 
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path :eval no
     cd $user
@@ -73,7 +80,7 @@ Wir behalten den Pfad zum Skripten-Ordner in einer Variable 'skriptenpath'
 echo $skriptenpath
 #+end_src
 
-Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den wir im Ordner "Skripten-Walter" speichern.
+Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den wir im Ordner "Skripten-Rom" speichern.
 
 #+name: pdftxt_parl
 #+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
@@ -84,18 +91,16 @@ Wir wandeln die *.pdf-Dateien der Parlamentsdokumente mit folgendem Skript, den 
   mv $user/pdftxt.sh $user/$skr
 #+end_src
 
-Wir wandeln die Dokumente um.
+Wir wandeln die Parlamentsdokumente um.
 
 #+name: umw_parl
 #+begin_src shell :results silent :var user=user-path :var parl=pdfpath :var skr=skriptenpath :eval no
   for dir in $user/$parl/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/pdftxt.sh && rm *.msg && rm *.docx; done;
 #+end_src
 
-** Corpus nach Stichwörtern sortieren
+** Parlamentsdokumente nach Stichwort sortieren
 
-In einem zweiten Schritt wollen wir die konvertierten Dateien nach Stichwörtern sortieren und die Ergebnisse in Ordner speichern, die mit diesen Stichwörtern gekennzeichnet werden. Dafür brauchen wir einen Skript, der in alle Ordner geht, und der einen anderen Skript ausführt, der die Dateien sortiert und in die vorgesehenen Ordner speichert.
-
-Der erste Skript sieht wie umw_parl aus, aber er muss einen anderen skript laufen lassen, den wir filter.sh benennen und der die folgenden Zeilen enthält:
+Wir sortieren die konvertierten Dateien nach einem Stichwort "Rechenzentr", um alle Varianten vom Begriff "Rechenzentrum" (Nominativ, Genitiv, Plural/Einzahlformen) abzufangen. Dafür brauchen wir einen Skript, der in alle Ordner geht, in denen die Dokumente gespeichert sind und nur die Dokumente nimmt, die eine Variante vom erwünschten Begriff enthalten. Diese Dokumente werden in einem Ordner "Rechenzentr_res" gespeichert.
 
 #+name: filter_parl
 #+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
@@ -107,14 +112,14 @@ Der erste Skript sieht wie umw_parl aus, aber er muss einen anderen skript laufe
   mv $user/filter.sh $user/$skr
 #+end_src
 
-Jetzt können wir unseren umw_parl code anpassen, damit der filter.sh Skript ausgeführt wird
+Wir passen unseren umw_parl Code-Block an, damit der 'filter.sh' Skript richtig ausgeführt wird:
 
 #+name: umw_parl2
 #+begin_src shell :results silent :var user=user-path :var parl=pdfpath :var skr=skriptenpath
-  for dir in $user/$parl/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/filter.sh && rm *.msg && rm *.docx; done;
+  for dir in $user/$parl/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and sorting files" && bash $user/$skr/filter.sh && rm *.msg && rm *.docx; done;
 #+end_src
 
-Wir exportieren die Ergebnisse zum Ordner 'Parl-Results' und wir trennen die vier ersten Zahlen (die Jahren) vom Dokumentnamen:
+Wir exportieren die Ergebnisse bzw. die Dateien in den jeweiligen Ordnern "Rechenzentr_res" zu einem Ordner 'Parl-Results' im Arbeitsverzeichnis, und wir trennen die vier ersten Zahlen (die Jahren) des Dokumentnamens vom Rest des Namens mit einem Bindestrich:
 
 #+name: parl_results
 #+begin_src shell :results silent :var parl=pdfpath :var user=user-path
@@ -123,22 +128,24 @@ Wir exportieren die Ergebnisse zum Ordner 'Parl-Results' und wir trennen die vie
   for i in $user/Parl-Results/Rechenzentr_res/*; do mv ./"$i" "${i:0:4}-${i:4}"; done
 #+end_src
 
+Wir behandeln anschließend die Protokollen des Bundestages.
+
 * Protokollen
 
-Ein Großteil der Arbeit wurde für die Parlamentsdokumente schon erledigt. Für die Protokollen müssen wir nur noch die vorhandenen Skript anpassen. Zuerst müssen wir die Dateien in den jeweiligen Ordner konvertieren. Es sind XML-Dateien, die wir mit Pandoc konvertieren. Dabei wollen wir zwei Zeilen (<div> und <sp> Zeilen) behalten, weil diese Zeilen Metainformationen enthalten, die wir benutzen werden, um die Dateien in einem späteren Schritt zu zerlegen.
+Wir müssen die Dateien in den jeweiligen Unterordner (von 01 bis 19) konvertieren. Es sind XML-Dateien, die wir mit Pandoc konvertieren können. Dabei wollen wir zwei Zeilen (<div> und <sp> Zeilen) aus den Quellen behalten, weil diese Zeilen Metainformationen enthalten, die wir benutzen werden, um die Dateien in einem späteren Schritt zu zerlegen.
 
 ** Vorbereitung und Umwandlung
 
-Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh (siehe unten).
+Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh (s. u.).
 
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path
   rm -r $user/$xml/19
 #+end_src
 
-Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwandeln und nach TOP zu zerlegen.
+Zuerst schreiben wir einen Parser, um die XML-Dateien in *.txt-Dateien zu verwandeln und nach Sitzungen und Tagesordnungspunkten (TOP) zu zerlegen.
 
 #+name: parser_prot
-#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath :eval no
+#+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
   touch $user/parsprot.sh
   echo "#!/bin/bash" >> $user/parsprot.sh
   echo "for i in *.xml; do sed -i 's/<sp /<div /' \"\$i\"; done" >> $user/parsprot.sh
@@ -154,18 +161,18 @@ Zuerst erstellen wir den parser, um die XML-Dateien in *.txt-Dateien zu verwande
   mv $user/parsprot.sh $user/$skr
 #+end_src
 
-Wir gehen dann durch alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien, die wir anschließend nach TOP zerlegen. Dies machen wir mit dem folgenden Skript.
+Wir gehen dann in alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien, die wir anschließend nach Sitzungen und TOP zerlegen. Dies machen wir mit der folgenden Schleife:
 
 #+name: umw_prot
-#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path :eval no
+#+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path
   for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/parsprot.sh; done;
 #+end_src
 
-Wir haben jetzt eine Datei je TOP. Wir müssen zuerst diese Dateien nach den relevanten Stichwörtern sortieren, bevor wir sie erneute nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien je Stichwort und dabei benutzen wir den gleichen Skript wie für die Parlamentsdokumente.
+Wir haben jetzt eine Datei je Sitzung und TOP. Wir müssen diese Dateien nach dem für uns relevanten Stichwort "Rechenzentr" sortieren, bevor wir sie nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien je Stichwort und dabei benutzen wir den gleichen Skript wie für die Parlamentsdokumente.
 
 #+name: umw_prot2
 #+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path
-  for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/filter.sh; done;
+  for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and sorting files" && bash $user/$skr/filter.sh; done;
 #+end_src
 
 Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Wir brauchen einen neuen Skript für die Zerlegung der Dateien.
@@ -184,7 +191,7 @@ Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern ze
       mv $user/zerleg-prot.sh $user/$skr
 #+end_src
 
-Wir stellen dann einen Ordner 'XML-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
+Wir stellen einen Ordner 'XML-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
 
 #+name: zerleg_results
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path
@@ -192,7 +199,7 @@ Wir stellen dann einen Ordner 'XML-Results' her, und wir kopieren alle Dateien a
   for dir in $user/$xml/*; do cp -rp "$dir"/Rechenzentr_res $user/XML-Results/; done
 #+end_src
 
-Wir brauchen ebenfalls einen neuen Skript, um in den Ordner 'XML-Results/Rechenzentr_res' zu gehen, und die Dateien mit dem zerleg-prot.sh Skirpt zu zerlegen:
+Wir gehen mit unserem Skript 'zerleg-prot.sh' zum Ordner 'XML-Results/Rechenzentr_res', und wir zerlegen die Dateien:
 
 #+name: enterdirprotres
 #+begin_src shell :results none :var user=user-path :var skr=skriptenpath
@@ -200,7 +207,7 @@ Wir brauchen ebenfalls einen neuen Skript, um in den Ordner 'XML-Results/Rechenz
   sh $user/$skr/zerleg-prot.sh
 #+end_src
 
-Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden gruppieren werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln.
+Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden in einem gemeinsamen Ordner gruppieren werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln, der Dateien enthält, die anders als die Dateien in den anderen Ordnern formatiert wurde.
 
 ** Behandlung des Ordners 19
 
@@ -229,14 +236,14 @@ Wir schreiben eine veränderte Version von unserem Parser, um die richtige Posit
   mv $user/parsprot19.sh $user/$skr
 #+end_src
 
-Wir konvertieren dann die Dateien in diesem Ordner und wir sortieren sie nach Anwesenheit von unserem Stichwort 'Rechenzentr':
+Wir konvertieren die Dateien in diesem Ordner und wir sortieren sie nach unserem Stichwort "Rechenzentr":
 
-#+name: umw_prot
+#+name: umw19_prot
 #+begin_src shell :results silent :var skr=skriptenpath :var user=user-path :eval no
   cd $user/19 && bash $user/$skr/parsprot19.sh && bash $user/$skr/filter.sh
 #+end_src
 
-Wir stellen dann einen Ordner '19-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
+Wir stellen einen Ordner '19-Results' im Arbeitsverzeichnis her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
 
 #+name: zerleg19_results
 #+begin_src shell :results silent :var user=user-path
@@ -267,3 +274,7 @@ Jetzt können wir mit diesem Skript die Dokumente im Ordner '19-Results' zerlege
   cd $user/19-Results
   sh $user/$skr/zerleg19-prot.sh
 #+end_src
+
+** Fehlende Protokolle hinzufügen
+
+Im
