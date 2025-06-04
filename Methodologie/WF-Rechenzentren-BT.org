@@ -289,10 +289,26 @@ cp -r /home/cpsoz/ROM-Data-2023-2025 $user
 Wir wandeln die *.xml-Dateien in *.txt-Dateien:
 
 #+name: umw-data2325
-#+begin_src shell :var user=user-path
+#+begin_src shell :var user=user-path :results silent
   cd $user/ROM-Data-2023-2025
   for i in *.xml; do pandoc -f html -t markdown -s "$i" -o ${i%.*}.txt; done
   rm *.xml
 #+end_src
 
-#+RESULTS: umw-data2325
+** Zusammenführung der Dateien
+
+Unsere Dateien befinden sich in drei unterschiedlichen Ordnern, weshalb wir sie in einem gemeinsamen Ordner speichern möchten. Dafür stellen wir den gemeinsamen Ordner 'Rechenzentren' mit folgenden Zeilen her:
+
+#+name: rechenordner
+#+begin_src shell :var user=user-path :results silent
+  cd $user && mkdir Rechenzentren
+#+end_src
+
+Wir kopieren die Dateien von den drei 'Results' Ordner zu unserem Rechenzentren-Ordner.
+
+#+name: kop-rechenordner
+#+begin_src shell :var user=user-path :results silent
+  cp $user/19-Results/* $user/Rechenzentren
+  cp $user/Parl-Results/Rechenzentr_res/* $user/Rechenzentren
+  cp $user/XML-Results/Rechenzentr_res/* $user/Rechenzentren
+#+end_src
