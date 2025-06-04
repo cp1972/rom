@@ -321,31 +321,32 @@ Wir wollen die Dateien je Legislaturperiode bzw. Wahlperiode anordnen. Dafür st
   mkdir 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20
 #+end_src
 
-Wir verschieben dann die Dateien zu den geeigneten Wahlperioden:
+Wir verschieben dann die Dateien zu den geeigneten Wahlperioden und wir löschen die möglichen leeren Ordner:
 
 #+name: wahlmv
-#+begin_src shell :var user=user-path :results silent
+#+begin_src shell :var user=user-path :results none
   cd $user/Rechenzentren
-  mv {1949..1953} 01
-  mv {1954..1957} 02
-  mv {1958..1961} 03
-  mv {1962..1965} 04
-  mv {1966..1969} 05
-  mv {1970..1972} 06
-  mv {1973..1976} 07
-  mv {1977..1980} 08
-  mv {1981..1983} 09
-  mv {1984..1987} 10
-  mv {1988..1990} 11
-  mv {1991..1994} 12
-  mv {1995..1998} 13
-  mv {1999..2002} 14
-  mv {2003..2005} 15
-  mv {2006..2009} 16
-  mv {2010..2013} 17
-  mv {2014..2017} 18
-  mv {2018..2021} 19
-  mv {2022..2025} 20
+  mv {1949..1953}*.txt 01
+  mv {1954..1957}*.txt 02
+  mv {1958..1961}*.txt 03
+  mv {1962..1965}*.txt 04
+  mv {1966..1969}*.txt 05
+  mv {1970..1972}*.txt 06
+  mv {1973..1976}*.txt 07
+  mv {1977..1980}*.txt 08
+  mv {1981..1983}*.txt 09
+  mv {1984..1987}*.txt 10
+  mv {1988..1990}*.txt 11
+  mv {1991..1994}*.txt 12
+  mv {1995..1998}*.txt 13
+  mv {1999..2002}*.txt 14
+  mv {2003..2005}*.txt 15
+  mv {2006..2009}*.txt 16
+  mv {2010..2013}*.txt 17
+  mv {2014..2017}*.txt 18
+  mv {2018..2021}*.txt 19
+  mv {2022..2025}*.txt 20
+  find . -type d -empty -delete
 #+end_src
 
-Unser Datensatz ist jetzt bereit und kann analysiert werden. Dies erfolgt im Rahmen von einem anderen Workflow.
+Unser Datensatz ist jetzt bereit und kann analysiert werden. Dies erfolgt im einem anderen Workflow.
