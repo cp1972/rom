@@ -1,3 +1,113 @@
 * Topic-Modell-Analyse zur Rekonstruktion der politischen Entscheidungen zu Rechenzentren in Deutschland
 
-Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:~/Github/rom/Methodologie/][Workflow]] hergestellt haben.
+Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+
+** Vorgehen
+
+Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordner in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperioden von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
+
+Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise von Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichten miteinander vergleichen, um eine Sicht der Vielfalt von Themen in der Zeit und derer Entwicklung zu gewinnen.
+
+** Dieses Workflow als Anwendung benutzen
+
+Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'tm-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+
+#+name: user-path
+#+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
+  mkdir $user/TM-Analyse
+#+end_src
+
+Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir einen Ordner 'TM-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'TM-Analyse' als neuen Benutzerpfad:
+
+#+name: nuser
+#+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/TM-Analyse" :results silent
+  echo $nuserpath
+#+end_src
+
+#+name: tm-skripten
+#+begin_src shell :var userpath=nuser :results silent
+  mkdir $nuser/TM-Skripten
+#+end_src
+
+Wichtig: wie im ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
+
+Dann schreiben wir den 'tm-rech.sh' Skript:
+
+#+begin_src shell :results silent :var user=nuser
+  touch $user/tm-rech.sh
+  echo "#!/bin/bash" >> $user/tm-rech.sh
+  echo 'emacs --batch \' >> $user/tm-rech.sh
+  echo "      --eval \"(require 'org)\" \ " >> $user/tm-rech.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tm-rech.sh
+  echo "      --eval '(org-babel-tangle-file \"02-WF-Rech-TM.org\")' \ " >> $user/tm-rech.sh
+  chmod +x $user/tm-rech.sh
+#+end_src
+
+Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, etwa: bash tm-rech.sh
+
+Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung funktioniert mit Python3.x und der [[https://www.anaconda.com/download][Anaconda-Distribution]]. Sie kann mit den üblichen Betriebssysteme verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Ein Code-Block stellen wir her, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
+
+#+name: mta-copy
+#+begin_src shell :var mtap="/home/cpsoz/Github/mta-app" :var user=nuser :results silent
+  cp $mtap/MTA.py $user/TM-Skripten
+#+end_src
+
+* TM-Analyse. Training der Modelle
+
+Im Rahmen von Topic-Modell-Analysen müssen wir zuerst wissen, wie viele Themen für einen bestimmten Datensatz sinnvoll zu modellieren sind. Deshalb müssen wir in einem ersten Schritt MTA auf die Dateien trainieren, die wir in den Unterordnern vom Ordner 'Rechenzentren' gespeichert haben. Wir schreiben einen ersten Code-Block zum Ordner 'Rechenzentren'
+
+#+name: rechpfad
+#+begin_src shell :var rechpath="/home/cpsoz/ROM-Data/Rechenzentren" :results silent
+  echo $rechpath
+#+end_src
+
+Wir müssen auch bedenken, dass MTA eine Liste von Wörtern (ein Wort je Zeile) braucht, die für die Analyse sehr wenig bis nicht relevant sind und deshalb nicht berücksichtigt werden müssen. Es sind Stop-Wörter, die in unserem Fall deutsche Wörter sind und sich im folgenden Ordner befinden:
+
+#+name: stops
+#+begin_src shell :var stopwords="/home/cpsoz/Org/Stopwords" :results silent
+  echo $stopwords
+#+end_src
+
+Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] MTA mit der folgenden 'mta-train.txt'-Datei, die wir in unserem 'TM-Skripten' Ordner speichern:
+
+#+name: autotrain-01
+#+begin_src shell :var user=nuser :var rech=rechpfad :var stopw=stops :results silent
+  touch $user/TM-Skripten/mta-train.txt
+  echo $rech"/01/*" >> $user/TM-Skripten/mta-train.txt
+  echo "y" >> $user/TM-Skripten/mta-train.txt
+  echo $stopw"/de.txt" >> $user/TM-Skripten/mta-train.txt
+  echo "5" >> $user/TM-Skripten/mta-train.txt
+  echo "n" >> $user/TM-Skripten/mta-train.txt
+  echo "de" >> $user/TM-Skripten/mta-train.txt
+  echo "a" >> $user/TM-Skripten/mta-train.txt
+  echo "1" >> $user/TM-Skripten/mta-train.txt
+  echo "y" >> $user/TM-Skripten/mta-train.txt
+  echo "15" >> $user/TM-Skripten/mta-train.txt
+  echo "4" >> $user/TM-Skripten/mta-train.txt
+  echo "n" >> $user/TM-Skripten/mta-train.txt
+  echo "0" >> $user/TM-Skripten/mta-train.txt
+#+end_src
+
+Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir führen MTA mit dieser Datei im folgenden Code-Block aus:
+
+#+name: trainmta
+#+begin_src shell :var user=nuser :results none
+  cat $user/TM-Skripten/mta-train.txt | python3 $user/TM-Skripten/MTA.py
+#+end_src
+
+#+name: trainscores
+#+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
+  echo "------" >> $user/TM-train-scores.txt
+  echo " " >> $user/TM-train-scores.txt
+  cat $mtadir/MTA-Results*/Summary*.log | sed -n '/Elbow scores/,/LDA-Cophenet correlation/p' | tr -cd '[:space:][:digit:]' | awk 'NF' | awk '{$1=$1;print}' >> $user/TM-train-scores.txt
+  echo "------" >> $user/TM-train-scores.txt
+  echo " " >> $user/TM-train-scores.txt
+  cd $mtadir && rm -r MTA-Results
+#+end_src
+
+#+name: autotrain-02
+#+begin_src shell :var user=nuser :results silent :noweb yes
+  sed -i '1 s/01/02/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src

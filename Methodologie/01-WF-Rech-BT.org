@@ -21,7 +21,7 @@ Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind di
 
 ** Dieses Workflow als Anwendung benutzen
 
-Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode im Texteditor und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'datab-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'datab-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
 
 #+name: user-path
 #+begin_src shell :var userpath="/home/cpsoz/ROM-Data" :results silent
@@ -38,7 +38,7 @@ Dann schreiben wir den 'datab-rech.sh' Skript:
   echo 'emacs --batch \' >> $user/datab-rech.sh
   echo "      --eval \"(require 'org)\" \ " >> $user/datab-rech.sh
   echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/datab-rech.sh
-  echo "      --eval '(org-babel-tangle-file \"WF-Datenzentren-Bundestag.org\")' \ " >> $user/datab-rech.sh
+  echo "      --eval '(org-babel-tangle-file \"01-WF-Rech-BT.org\")' \ " >> $user/datab-rech.sh
   chmod +x $user/datab-rech.sh
 #+end_src
 
@@ -349,4 +349,4 @@ Wir verschieben dann die Dateien zu den geeigneten Wahlperioden und wir löschen
   find . -type d -empty -delete
 #+end_src
 
-Unser Datensatz ist jetzt bereit und kann analysiert werden. Dies erfolgt im einem anderen Workflow.
+Unser Datensatz ist jetzt bereit und kann analysiert werden. Dies erfolgt im einem [[file+sys:~/Github/rom/Methodologie/02-WF-Rech-TM.org][zweiten Workflow]].
