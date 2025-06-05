@@ -26,7 +26,7 @@ Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir 
 
 #+name: tm-skripten
 #+begin_src shell :var userpath=nuser :results silent
-  mkdir $nuser/TM-Skripten
+  mkdir $userpath/TM-Skripten
 #+end_src
 
 Wichtig: wie im ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
@@ -95,19 +95,134 @@ Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir fü
   cat $user/TM-Skripten/mta-train.txt | python3 $user/TM-Skripten/MTA.py
 #+end_src
 
+Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die angewendet wird. Wir nehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
+
 #+name: trainscores
 #+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
+  echo " " >> $user/TM-train-scores.txt
+  cat $mtadir/MTA-Results*/Summary*.log | sed -n '/Elbow /,/Correlation values LDA/p' | awk 'NF' | awk '{$1=$1;print}' >> $user/TM-train-scores.txt
   echo "------" >> $user/TM-train-scores.txt
   echo " " >> $user/TM-train-scores.txt
-  cat $mtadir/MTA-Results*/Summary*.log | sed -n '/Elbow scores/,/LDA-Cophenet correlation/p' | tr -cd '[:space:][:digit:]' | awk 'NF' | awk '{$1=$1;print}' >> $user/TM-train-scores.txt
-  echo "------" >> $user/TM-train-scores.txt
-  echo " " >> $user/TM-train-scores.txt
-  cd $mtadir && rm -r MTA-Results
+  find $mtadir -type d -name "MTA-Results*" -exec rm -r {} +
 #+end_src
 
+Wir evaluieren die folgenden Code-Blöcke für die weiteren gültigen Ordner.
+
 #+name: autotrain-02
-#+begin_src shell :var user=nuser :results silent :noweb yes
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
   sed -i '1 s/01/02/' $user/TM-Skripten/mta-train.txt
   <<trainmta>>
   <<trainscores>>
+#+end_src
+
+#+name: autotrain-04
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/02/04/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-05
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/04/05/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-06
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/05/06/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-08
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/06/08/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-09
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/08/09/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-10
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/09/10/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-11
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/10/11/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-13
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/11/13/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-14
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/13/14/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-15
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/14/15/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-16
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/15/16/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-17
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/16/17/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-18
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/17/18/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-19
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/18/19/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-20
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/19/20/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+Wir können dann alle Ergebnisse aus der Datei 'TM-train-scores.txt'.
+
+#+name: autotrain-20
+#+begin_src shell :var user=nuser :results output
+  cat $user/TM-train-scores.txt
 #+end_src
