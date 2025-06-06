@@ -4,9 +4,9 @@ Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die
 
 ** Vorgehen
 
-Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordner in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperioden von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
+Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordnern in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperiode von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
 
-Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise von Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichten miteinander vergleichen, um eine Sicht der Vielfalt von Themen in der Zeit und derer Entwicklung zu gewinnen.
+Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise aus Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichte miteinander vergleichen, um eine Sicht über die Vielfalt von Themen in der Zeit und ihre Entwicklung zu gewinnen.
 
 ** Dieses Workflow als Anwendung benutzen
 
@@ -43,7 +43,7 @@ Dann schreiben wir den 'tm-rech.sh' Skript:
   chmod +x $user/tm-rech.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, etwa: bash tm-rech.sh
+Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash tm-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem tm-rech.sh sich befindet).
 
 Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung funktioniert mit Python3.x und der [[https://www.anaconda.com/download][Anaconda-Distribution]]. Sie kann mit den üblichen Betriebssysteme verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Ein Code-Block stellen wir her, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
 
@@ -95,7 +95,7 @@ Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir fü
   cat $user/TM-Skripten/mta-train.txt | python3 $user/TM-Skripten/MTA.py
 #+end_src
 
-Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die angewendet wird. Wir nehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
+Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
 
 #+name: trainscores
 #+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
@@ -106,7 +106,7 @@ Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevant
   find $mtadir -type d -name "MTA-Results*" -exec rm -r {} +
 #+end_src
 
-Wir evaluieren die folgenden Code-Blöcke für die weiteren gültigen Ordner.
+Wir evaluieren die folgenden Code-Blöcke für die weiteren Unterordner im Ordner 'Rechenzentren':
 
 #+name: autotrain-02
 #+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
@@ -220,9 +220,9 @@ Wir evaluieren die folgenden Code-Blöcke für die weiteren gültigen Ordner.
   <<trainscores>>
 #+end_src
 
-Wir können dann alle Ergebnisse aus der Datei 'TM-train-scores.txt'.
+Wir können dann alle Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block lesen.
 
-#+name: autotrain-20
-#+begin_src shell :var user=nuser :results output
-  cat $user/TM-train-scores.txt
+#+name: mta-scores
+#+begin_src shell :var user=nuser :results drawer
+    cat $user/TM-train-scores.txt
 #+end_src
