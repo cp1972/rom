@@ -1,0 +1,8 @@
+
+TOPIC '*'
+
+Um diese Frage zu beantworten, benötige ich den Text, der als Kontext dient. Bitte stellen Sie die Frage erneut und fügen Sie den entsprechenden Text hinzu. Ohne den Kontext kann ich keine thematischen Gemeinsamkeiten zwischen Wörtern erkennen.
+
+TOPIC '*'
+
+Um diese Frage zu beantworten, benötige ich den Text, der als Kontext dient. Der von Ihnen bereitgestellte Text ist leer. Bitte stellen Sie den vollständigen Kontextt zur Verfügung, damit ich die thematischen Gemeinsamkeiten zwischen den Wörtern analysieren kann.
