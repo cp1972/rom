@@ -1,3 +1,85 @@
+* Deutung der allgemeinen Themen im Rahmen der politischen Debatten zu Rechenzentren in Deutschland
+
+Dieses Dokument stellt ein Workflow zur Deutung der allgemeinen Themen im Rahmen der politischen Debatten zu Rechenzentren in Deutschland dar. Wir verwenden die Ergebnisse aus unserem [[file:02-WF-Rech-BT.org][zweiten Workflow]] zur Topic-Modell-Analyse der Debatten zu Rechenzentren in Deutschland. Wie unsere zwei ersten Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+
+** Vorgehen
+
+Am Ende von unserer Topic-Modell-Analyse haben wir die Ergebnisse bzw. die Topics jeder Wahlperiode zu einer KI gesendet, die die Zusammenstellung von Begriffen nach gemeinsamer Bedeutung prüfen sollte. Die Berichte der KI haben wir gelesen und korrigiert haben, wo es sein musste. Diese Berichte wollen wir mit zwei Zielen behandeln:
+
+- Ziel 1: welche -- wichtige bzw. zentrale oder unwichtige bzw. nicht zentrale --  Bedeutung solche Rahmenthemen in diesen Debatten gehabt haben?
+- Ziel 2: im Rahmen der Debatten, die mit Bezug auf die Rechenzentren in Deutschland entwickelt wurden, können spezifische Rahmenthemen erkannt werden?
+
+Zum Ziel 1 verwenden wir eine Analyse der Ähnlichkeiten zwischen den Berichten der KI, die uns zeigen wird, welche von diesen Berichten eine wichtige bzw. zentrale Bedeutung gehabt haben. Weil diese Berichte Themen erwähnen, die nicht immer und nicht unbedingt nur mit dem Thema der Rechenzentren in Deutschland verbunden sind, dann sollen wir aus den Berichten der KI die Textstellen identifizieren, die spezifischer mit dem Thema der Rechenzentren in Deutschland verbunden sind. Damit erreichen wir unser zweites Ziel, und in der entsprechenden Umsetzung führen wir auf die Berichte eine Analyse der semantischen Ähnlichkeiten auf der Ebene von Sätzen der Berichte der KI mit dem SBert-Algorithmus. Wir vergleichen dann beide Ergebnisse, um den Platz deuten zu können, den solche spezifische Themen in den Protokollen des Bundestages in der Zeit genommen haben bzw. um ihren Gewicht in den Debatten des Bundestages auf lange Sicht besser verstehen zu können.
+
+** Dieses Workflow als Anwendung benutzen
+
+Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'bert-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+
+#+name: user-path
+#+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
+  mkdir $user/BERT-Analyse
+#+end_src
+
+Unsere Analyse wird in diesem Ordner 'BERT-Analyse' stattfinden. Dort stellen wir einen Ordner 'BERT-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'BERT-Analyse' als neuen Benutzerpfad:
+
+#+name: nuser
+#+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/BERT-Analyse" :results silent
+  echo $nuserpath
+#+end_src
+
+#+name: bert-skripten
+#+begin_src shell :var userpath=nuser :results silent
+  mkdir $userpath/BERT-Skripten
+#+end_src
+
+Wichtig: wie in den zwei ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
+
+Dann schreiben wir den 'bert-rech.sh' Skript:
+
+#+begin_src shell :results silent :var user=nuser
+  touch $user/bert-rech.sh
+  echo "#!/bin/bash" >> $user/bert-rech.sh
+  echo 'emacs --batch \' >> $user/bert-rech.sh
+  echo "      --eval \"(require 'org)\" \ " >> $user/bert-rech.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/bert-rech.sh
+  echo "      --eval '(org-babel-tangle-file \"03-WF-Rech-TM.org\")' \ " >> $user/bert-rech.sh
+  chmod +x $user/bert-rech.sh
+#+end_src
+
+Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash bert-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem bert-rech.sh sich befindet).
+
+Im Rahmen dieser Analyse verwenden wir einen ersten python-Skript für die Berechnung der Ähnlichkeit zwischen den Berichten der KI (TeSi.py) und einen zweiten python-Skript für die semantischen Ähnlichkeiten zwischen Sätzen aus diesen Berichten (SCT.py). Beide Skripten befinden sich in einem Ordner 'Workflow_RES', weshalb wir sie zu unserem Ordner 'BERT-Skripten' kopieren
+
+#+name: bert-copy
+#+begin_src shell :var mtap="/home/cpsoz/Workflow_RES" :var user=nuser :results silent
+  cp $mtap/TeSi.py $user/BERT-Skripten && cp $mtap/SCT.py $user/BERT-Skripten
+#+end_src
+
+* Ziel 1. Bedeutung von Rahmenthemen zum Thema Rechenzentren in Deutschland
+
+Um unser erstes Ziel zu erreichen, verwenden wir unseren TeSi.py-Skript auf die Berichte der KI. Da TeSi stopwords braucht, um die Analyse durchzuführen, schreiben wir einen Code-Block zum Pfad der Stopwords auf unserem Rechner:
+
+#+name: stops
+#+begin_src shell :var stopwords="/home/cpsoz/Org/Stopwords" :results silent
+  echo $stopwords
+#+end_src
+
+Dann verwenden wir TeSi automatisch mit einer Datei 'tesi.txt', in der wir die Befehle schreiben, die TeSi braucht, um die Analyse durchzuführen; anschließend führen wir diese Analyse durch:
+
+#+name: tesi
+#+begin_src shell :var mtaki="/home/cpsoz/ROM-Data/TM-Analyse/MTA-KI/*" :var user=nuser :var stopw=stops  :results none
+  touch $user/BERT-Skripten/tesi.txt
+  echo $mtaki >> $user/BERT-Skripten/tesi.txt
+  echo "y" >> $user/BERT-Skripten/tesi.txt
+  echo $stopw"/de.txt" >> $user/BERT-Skripten/tesi.txt
+  echo "4" >> $user/BERT-Skripten/tesi.txt
+  python3 $user/BERT-Skripten/TeSi.py $mtaki
+#+end_src
+
+Damit haben wir eine bessere Sicht zu den Berichten der KI, die wenige Ähnlichkeiten zwischen Berichten zeigt -- die interessantesten Ergebnisse betreffen die Datei mit Ähnlichkeiten von 0.2 bis 0.29 auf einer Skala von 0.0 bis 1.0. Dort befinden sich schwache Verbindungen zwischen Berichten, die jedoch nicht zufällig entstanden sind. Über 0.3 gibt es eine Verbindung zwischen zwei Berichten mit einer Ähnlichkeit zwischen 0.4 bis 0.49, die jedoch das Thema der Rechenzentren oder Themen, die damit verbunden wären (wie Technologie, Rechner, Fortschritt usw.) nicht betreffen. Unter 0.2 gibt es sehr viele Verbindungen zwischen Berichten, die jedoch von weniger Relevanz sind, da es hier davon ausgegangen kann, dass solche Verbindungen aufgrund von sehr allgemeinen Merkmalen der Berichte der KI hergestellt werden (etwa es sind wahrscheinlich Protokolle von Debatten auf der politischen Ebene, die Themen der Wirtschaft, der Wissenschaft usw. betreffen).
+
+Ein solches Ergebnis zeigt, dass wir viel Rausch in unserer Topic-Modell-Analyse haben bzw. dass das Thema Rechenzentren in Deutschland wahrscheinlich nur eine kleine Rolle spielt in den Debatten im Bundestag. Dies müssen wir dennoch auf der Ebene des inhaltlichen Bezug auf das Thema Rechenzentren prüfen, weshalb
+
 a=`awk '{print $1}' Clusters_Years-11_06_2025_14_12_09.txt`
 b=`awk -F, '{print $1}' Corr_02_11_06_2025_14_17_53.csv
 c=`awk -F, '{print $2}' Corr_02_11_06_2025_14_17_53.csv`
@@ -5,60 +87,6 @@ echo "$a" | grep -Fx "$b" | uniq
 echo "$a" | grep -Fx "$c" | uniq
 
 
-
-* Topic-Modell-Analyse zur Rekonstruktion der politischen Entscheidungen zu Rechenzentren in Deutschland
-
-Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
-
-** Vorgehen
-
-Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordnern in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperiode von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
-
-Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise aus Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichte miteinander vergleichen, um eine Sicht über die Vielfalt von Themen in der Zeit und ihre Entwicklung zu gewinnen.
-
-** Dieses Workflow als Anwendung benutzen
-
-Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'tm-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
-
-#+name: user-path
-#+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
-  mkdir $user/TM-Analyse
-#+end_src
-
-Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir einen Ordner 'TM-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'TM-Analyse' als neuen Benutzerpfad:
-
-#+name: nuser
-#+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/TM-Analyse" :results silent
-  echo $nuserpath
-#+end_src
-
-#+name: tm-skripten
-#+begin_src shell :var userpath=nuser :results silent
-  mkdir $userpath/TM-Skripten
-#+end_src
-
-Wichtig: wie im ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
-
-Dann schreiben wir den 'tm-rech.sh' Skript:
-
-#+begin_src shell :results silent :var user=nuser
-  touch $user/tm-rech.sh
-  echo "#!/bin/bash" >> $user/tm-rech.sh
-  echo 'emacs --batch \' >> $user/tm-rech.sh
-  echo "      --eval \"(require 'org)\" \ " >> $user/tm-rech.sh
-  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tm-rech.sh
-  echo "      --eval '(org-babel-tangle-file \"02-WF-Rech-TM.org\")' \ " >> $user/tm-rech.sh
-  chmod +x $user/tm-rech.sh
-#+end_src
-
-Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash tm-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem tm-rech.sh sich befindet).
-
-Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung funktioniert mit Python3.x und der [[https://www.anaconda.com/download][Anaconda-Distribution]]. Sie kann mit den üblichen Betriebssysteme verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Ein Code-Block stellen wir her, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
-
-#+name: mta-copy
-#+begin_src shell :var mtap="/home/cpsoz/Github/mta-app" :var user=nuser :results silent
-  cp $mtap/MTA.py $user/TM-Skripten
-#+end_src
 
 * TM-Analyse. Training der Modelle
 

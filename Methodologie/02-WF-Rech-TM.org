@@ -1,6 +1,6 @@
-* Topic-Modell-Analyse zur Rekonstruktion der politischen Entscheidungen zu Rechenzentren in Deutschland
+* Topic-Modell-Analyse zu den allgemeinen Themen um die Rechenzentren in den Debatten des Bundestages in Deutschland
 
-Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten dar, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
 
 ** Vorgehen
 
