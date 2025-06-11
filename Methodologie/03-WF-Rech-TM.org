@@ -1,0 +1,567 @@
+a=`awk '{print $1}' Clusters_Years-11_06_2025_14_12_09.txt`
+b=`awk -F, '{print $1}' Corr_02_11_06_2025_14_17_53.csv
+c=`awk -F, '{print $2}' Corr_02_11_06_2025_14_17_53.csv`
+echo "$a" | grep -Fx "$b" | uniq
+echo "$a" | grep -Fx "$c" | uniq
+
+
+
+* Topic-Modell-Analyse zur Rekonstruktion der politischen Entscheidungen zu Rechenzentren in Deutschland
+
+Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+
+** Vorgehen
+
+Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordnern in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperiode von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
+
+Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise aus Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichte miteinander vergleichen, um eine Sicht über die Vielfalt von Themen in der Zeit und ihre Entwicklung zu gewinnen.
+
+** Dieses Workflow als Anwendung benutzen
+
+Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'tm-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+
+#+name: user-path
+#+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
+  mkdir $user/TM-Analyse
+#+end_src
+
+Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir einen Ordner 'TM-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'TM-Analyse' als neuen Benutzerpfad:
+
+#+name: nuser
+#+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/TM-Analyse" :results silent
+  echo $nuserpath
+#+end_src
+
+#+name: tm-skripten
+#+begin_src shell :var userpath=nuser :results silent
+  mkdir $userpath/TM-Skripten
+#+end_src
+
+Wichtig: wie im ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
+
+Dann schreiben wir den 'tm-rech.sh' Skript:
+
+#+begin_src shell :results silent :var user=nuser
+  touch $user/tm-rech.sh
+  echo "#!/bin/bash" >> $user/tm-rech.sh
+  echo 'emacs --batch \' >> $user/tm-rech.sh
+  echo "      --eval \"(require 'org)\" \ " >> $user/tm-rech.sh
+  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tm-rech.sh
+  echo "      --eval '(org-babel-tangle-file \"02-WF-Rech-TM.org\")' \ " >> $user/tm-rech.sh
+  chmod +x $user/tm-rech.sh
+#+end_src
+
+Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash tm-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem tm-rech.sh sich befindet).
+
+Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung funktioniert mit Python3.x und der [[https://www.anaconda.com/download][Anaconda-Distribution]]. Sie kann mit den üblichen Betriebssysteme verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Ein Code-Block stellen wir her, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
+
+#+name: mta-copy
+#+begin_src shell :var mtap="/home/cpsoz/Github/mta-app" :var user=nuser :results silent
+  cp $mtap/MTA.py $user/TM-Skripten
+#+end_src
+
+* TM-Analyse. Training der Modelle
+
+Im Rahmen von Topic-Modell-Analysen müssen wir zuerst wissen, wie viele Themen für einen bestimmten Datensatz sinnvoll zu modellieren sind. Deshalb müssen wir in einem ersten Schritt MTA auf die Dateien trainieren, die wir in den Unterordnern vom Ordner 'Rechenzentren' gespeichert haben. Wir schreiben einen ersten Code-Block zum Ordner 'Rechenzentren'
+
+#+name: rechpfad
+#+begin_src shell :var rechpath="/home/cpsoz/ROM-Data/Rechenzentren" :results silent
+  echo $rechpath
+#+end_src
+
+Wir müssen auch bedenken, dass MTA eine Liste von Wörtern (ein Wort je Zeile) braucht, die für die Analyse sehr wenig bis nicht relevant sind und deshalb nicht berücksichtigt werden müssen. Es sind Stop-Wörter, die in unserem Fall deutsche Wörter sind und sich im folgenden Ordner befinden:
+
+#+name: stops
+#+begin_src shell :var stopwords="/home/cpsoz/Org/Stopwords" :results silent
+  echo $stopwords
+#+end_src
+
+Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] MTA mit der folgenden 'mta-train.txt'-Datei, die wir in unserem 'TM-Skripten' Ordner speichern:
+
+#+name: autotrain-01
+#+begin_src shell :var user=nuser :var rech=rechpfad :var stopw=stops :results silent
+  touch $user/TM-Skripten/mta-train.txt
+  echo $rech"/01/*" >> $user/TM-Skripten/mta-train.txt
+  echo "y" >> $user/TM-Skripten/mta-train.txt
+  echo $stopw"/de.txt" >> $user/TM-Skripten/mta-train.txt
+  echo "5" >> $user/TM-Skripten/mta-train.txt
+  echo "n" >> $user/TM-Skripten/mta-train.txt
+  echo "de" >> $user/TM-Skripten/mta-train.txt
+  echo "a" >> $user/TM-Skripten/mta-train.txt
+  echo "1" >> $user/TM-Skripten/mta-train.txt
+  echo "y" >> $user/TM-Skripten/mta-train.txt
+  echo "15" >> $user/TM-Skripten/mta-train.txt
+  echo "4" >> $user/TM-Skripten/mta-train.txt
+  echo "n" >> $user/TM-Skripten/mta-train.txt
+  echo "0" >> $user/TM-Skripten/mta-train.txt
+#+end_src
+
+Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir führen MTA mit dieser Datei im folgenden Code-Block aus:
+
+#+name: trainmta
+#+begin_src shell :var user=nuser :results none
+  cat $user/TM-Skripten/mta-train.txt | python3 $user/TM-Skripten/MTA.py
+#+end_src
+
+Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
+
+#+name: trainscores
+#+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
+  echo " " >> $user/TM-train-scores.txt
+  cat $mtadir/MTA-Results*/Summary*.log | sed -n '/Elbow /,/Correlation values LDA/p' | awk 'NF' | awk '{$1=$1;print}' >> $user/TM-train-scores.txt
+  echo "------" >> $user/TM-train-scores.txt
+  echo " " >> $user/TM-train-scores.txt
+  find $mtadir -type d -name "MTA-Results*" -exec rm -r {} +
+#+end_src
+
+Wir evaluieren die folgenden Code-Blöcke für die weiteren Unterordner im Ordner 'Rechenzentren':
+
+#+name: autotrain-02
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/01/02/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-04
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/02/04/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-05
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/04/05/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-06
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/05/06/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-08
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/06/08/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-09
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/08/09/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-10
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/09/10/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-11
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/10/11/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-13
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/11/13/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-14
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/13/14/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-15
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/14/15/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-16
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/15/16/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-17
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/16/17/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-18
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/17/18/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+Für den Ordner 19 haben wir nur zwei große Dateien, deshalb zerschneiden wir die Dateien in 20 Dateien jeweils:
+
+#+name: split-19
+#+begin_src shell :var rech=rechpfad :results none
+  cd $rech/19
+  for i in *.txt; do split -n 20 --numeric-suffixes "$i" "$i".fin ; done
+  rm *.txt
+  for i in *.txt.fin*; do mv "$i" "${i%}.txt"; done
+#+end_src
+
+Dann modellieren wir den Ordner 19:
+
+#+name: autotrain-19
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/18/19/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+#+name: autotrain-20
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/19/20/' $user/TM-Skripten/mta-train.txt
+  <<trainmta>>
+  <<trainscores>>
+#+end_src
+
+Wir können dann alle Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block lesen.
+
+#+name: mta-scores
+#+begin_src shell :var user=nuser :results drawer
+    cat $user/TM-train-scores.txt
+#+end_src
+
+Wir können jetzt die Dateien mit dem optimalen Anzahl an Topics modellieren.
+
+* Modellierung
+
+Dafür stellen wir eine veränderte Version von unserem Code-Block 'autotrain-01', die wir 'autotest-01' benennen:
+
+#+name: autotest-01
+#+begin_src shell :var user=nuser :var rech=rechpfad :var stopw=stops :results silent
+  touch $user/TM-Skripten/mta-test.txt
+  echo $rech"/01/*" >> $user/TM-Skripten/mta-test.txt
+  echo "y" >> $user/TM-Skripten/mta-test.txt
+  echo $stopw"/de.txt" >> $user/TM-Skripten/mta-test.txt
+  echo "5" >> $user/TM-Skripten/mta-test.txt
+  echo "n" >> $user/TM-Skripten/mta-test.txt
+  echo "de" >> $user/TM-Skripten/mta-test.txt
+  echo "a" >> $user/TM-Skripten/mta-test.txt
+  echo "1" >> $user/TM-Skripten/mta-test.txt
+  echo "n" >> $user/TM-Skripten/mta-test.txt
+  echo "6" >> $user/TM-Skripten/mta-test.txt
+  echo "n" >> $user/TM-Skripten/mta-test.txt
+  echo "2" >> $user/TM-Skripten/mta-test.txt
+  echo "2" >> $user/TM-Skripten/mta-test.txt
+  echo "y" >> $user/TM-Skripten/mta-test.txt
+  echo "0" >> $user/TM-Skripten/mta-test.txt
+#+end_src
+
+Dann modellieren wir den ersten Ordner:
+
+#+name: testmta
+#+begin_src shell :var user=nuser :results none
+  cat $user/TM-Skripten/mta-test.txt | python3 $user/TM-Skripten/MTA.py
+#+end_src
+
+Wir stellen einen Ordner 'MTA-Results' im Ordner TM-Analyse, um dort die Ergebnisse aus der Modellierung für jeden Subordner vom Ordner 'Rechenzentren' zu speichern:
+
+#+name: mtaresults
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none
+  mkdir $user/MTA-Results
+  mv $mtadir/MTA* $user/MTA-Results/
+#+end_src
+
+Dasselbe machen wir für die weiteren Subordner im Ordner 'Rechenzentren' mit Anpassung des Ordners (Zeile 1), der Anzahl an Topics (Zeile 10) und des Fensters für die Modellierung in der Zeit (Zeile 13). Wir benennen die MTA-Results-Ordner nach dem Subordner im Ordner 'Rechenzentren' um:
+
+#+name: autotest-02
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  mv $user/MTA-Results/MTA* $user/MTA-Results/MTA-01
+  sed -i '1 s/01/02/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/4/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/2/9/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-02
+#+end_src
+
+#+name: autotest-04
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/02/04/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/4/7/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/9/16/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-04
+#+end_src
+
+#+name: autotest-05
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/04/05/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/7/6/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/16/121/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-05
+#+end_src
+
+#+name: autotest-06
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/05/06/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/5/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/121/108/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-06
+#+end_src
+
+#+name: autotest-08
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/06/08/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/5/6/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/108/18/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-08
+#+end_src
+
+#+name: autotest-09
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/08/09/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/6/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/18/83/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-09
+#+end_src
+
+#+name: autotest-10
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/09/10/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/8/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/83/39/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-10
+#+end_src
+
+#+name: autotest-11
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/10/11/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/8/4/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/39/28/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-11
+#+end_src
+
+#+name: autotest-13
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/11/13/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/4/8/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/28/70/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-13
+#+end_src
+
+#+name: autotest-14
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/13/14/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/8/5/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/70/54/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-14
+#+end_src
+
+#+name: autotest-15
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/14/15/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/5/6/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/54/28/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-15
+#+end_src
+
+#+name: autotest-16
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/15/16/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/4/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/28/2/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-16
+#+end_src
+
+#+name: autotest-17
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/16/17/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/4/5/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/2/3/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-17
+#+end_src
+
+#+name: autotest-18
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/17/18/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/5/6/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/3/62/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-18
+#+end_src
+
+#+name: autotest-19
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/18/19/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/6/7/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/62/4/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-19
+#+end_src
+
+#+name: autotest-20
+#+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
+  sed -i '1 s/19/20/' $user/TM-Skripten/mta-test.txt
+  sed -i '10 s/7/3/' $user/TM-Skripten/mta-test.txt
+  sed -i '13 s/4/32/' $user/TM-Skripten/mta-test.txt
+  <<testmta>>
+  <<mtaresults>>
+  mv $user/MTA-Results/MTA-Results* $user/MTA-Results/MTA-20
+#+end_src
+
+Wir können jetzt die Ergebnisse interpretieren.
+
+* Interpretation der Ergebnisse
+
+Wir automatisieren die Interpretation der Ergebnisse mit einer KI. Dafür haben wir die [[https://github.com/aandrew-me/tgpt][Anwendung tgpt]] installiert, die wir programmatisch verwenden können. In einem ersten Schritt stellen wir den Ordner 'MTA-KI' her, in dem wir die Ergebnisse von unserer Interpretation der Topic-Modell-Analyse speichern werden:
+
+#+name: mta-ki-results
+#+begin_src shell :var user=nuser :results none
+  mkdir $user/MTA-KI
+#+end_src
+
+Wir gehen dann in den jeweiligen Ordner mit den Ergebnissen aus der Topic-Modell-Analyse, wir zerlegen die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mit ".out" Endung je Säule der Datei 'Top_Words_NMF_Topics_*.csv' herstellen. Dann passen wir den Inhalt von diesen ".out"-Dateien zur KI und wir speichern die Deutung der KI in einem Dokument. Zuerst schreiben wir den Skript, um die Ergebnisse von MTA zur KI zu senden und die Antworten der KI in eine Datei 'MTA-KI' zu schreiben:
+
+#+name: mta-ki-interpret
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-01/" :var user=nuser :var mtaint="01-MTA-KI.txt" :var mtcut="01-MTA-KI-" :results none
+  cd $mtares
+  cp Top_Words_NMF_Topics_*.csv TW.txt
+  sed -i '1d' TW.txt
+  awk -F, '{for (i=1;i<=NF;i++) print $i > i".out"}' TW.txt
+  for x in *.out; do echo -e "\nTOPIC '${x%.*}'\n" >> MTA-KI.txt && awk 'BEGIN { ORS = " " } { print }' "$x" | tgpt -q "welche thematischen Gemeinsamkeiten erkennst du zwischen diesen Wörtern" >> MTA-KI.txt; done
+  rm TW.txt *.out
+  mv MTA-KI.txt $user/MTA-KI/ && cd $user/MTA-KI/ && mv MTA-KI.txt $mtaint
+  csplit $mtaint /TOPIC/ '{*}' --prefix $mtcut -b "%02d.txt" && rm $mtaint && rm *-KI-00.txt
+#+end_src
+
+Dann machen wir die Interpretation für jeden Ordner:
+
+#+name: mta-ki-02
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-02/" :var user=nuser :var mtaint="02-MTA-KI.txt" :var mtcut="02-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-04
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-04/" :var user=nuser :var mtaint="04-MTA-KI.txt" :var mtcut="04-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-05
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-05/" :var user=nuser :var mtaint="05-MTA-KI.txt" :var mtcut="05-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-06
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-06/" :var user=nuser :var mtaint="06-MTA-KI.txt" :var mtcut="06-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-08
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-08/" :var user=nuser :var mtaint="08-MTA-KI.txt" :var mtcut="08-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-09
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-09/" :var user=nuser :var mtaint="09-MTA-KI.txt" :var mtcut="09-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-10
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-10/" :var user=nuser :var mtaint="10-MTA-KI.txt" :var mtcut="10-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-11
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-11/" :var user=nuser :var mtaint="11-MTA-KI.txt" :var mtcut="11-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-13
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-13/" :var user=nuser :var mtaint="13-MTA-KI.txt" :var mtcut="13-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-14
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-14/" :var user=nuser :var mtaint="14-MTA-KI.txt" :var mtcut="14-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-15
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-15/" :var user=nuser :var mtaint="15-MTA-KI.txt" :var mtcut="15-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-16
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-16/" :var user=nuser :var mtaint="16-MTA-KI.txt" :var mtcut="16-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-17
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-17/" :var user=nuser :var mtaint="17-MTA-KI.txt" :var mtcut="17-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-18
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-18/" :var user=nuser :var mtaint="18-MTA-KI.txt" :var mtcut="18-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-19
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-19/" :var user=nuser :var mtaint="19-MTA-KI.txt" :var mtcut="19-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+#+name: mta-ki-20
+#+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-20/" :var user=nuser :var mtaint="20-MTA-KI.txt" :var mtcut="20-MTA-KI-" :results none :noweb yes
+  <<mta-ki-interpret>>
+#+end_src
+
+An diesem Punkt empfiehlt sich, die Interpretation durch die KI zu kontrollieren bzw. zu korrigieren, und nicht nützliche Informationen aus der Dateien zu entfernen (etwa die Wiederholung der Wortlisten, die wir mit der Modellierung generiert haben). Diese Interpretationsberichte verwenden wir in einem dritten Workflow zur Erkennung von semantischen Ähnlichkeiten in der Interpretation der Modelle, die Auskunft über die Anwesenheit von ähnlichen Themen im Rahmen der 20 Wahlperioden, die wir berücksichtigen.
+
+* Fazit
+
+Mit diesem zweiten Workflow haben wir eine Modellierung des allgemeinen Kontextes der Debatten im Bundestag zum Thema Rechenzentren in Deutschland für die Zeit von 1949 bis 2025 vorgeschlagen. Wie hilfreich eine solche Modellierung ist, untersuchen wir in einem dritten Workflow. In diesem dritten Workflow analysieren wir die Ähnlichkeiten zwischen Themen in den unterschiedlichen Wahlperioden, was uns erlaubt, wiederholende Themen in der Zeit von 1949 bis 2025 zu erkennen, sowie die Entstehung von neuen Themen und das Verschwinden von alten Themen zu datieren.
+
+In diesem Zusammenhang werden wir uns fragen, ob die vorhandene Information ausreicht, um das Thema der Rechenzentren in Deutschland besser zu verstehen, oder ob wir gezielt eine eingeschränkte Anzahl an Dateien modellieren sollten, um mehr bzw. präzisere Informationen zu diesem Thema zu erhalten.
