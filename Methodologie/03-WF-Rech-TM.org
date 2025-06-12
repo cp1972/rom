@@ -96,6 +96,7 @@ Wir können den Code-Block 'sct' mit diesen Informationen herstellen und ausfüh
   echo "2" >> $user/BERT-Skripten/sct.txt
   echo "2" >> $user/BERT-Skripten/sct.txt
   echo "0.4" >> $user/BERT-Skripten/sct.txt
+  echo "0" >> $user/BERT-Skripten/sct.txt
   cat $user/BERT-Skripten/sct.txt | python3 $user/BERT-Skripten/SCT.py
 #+end_src
 

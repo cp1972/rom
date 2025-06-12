@@ -1,0 +1,51 @@
+
+Cluster 1
+19-MTA-KI-07.txt Technologische Aspekte: Begriffe wie "bibliotheken", "brems", "energien" und "anlagen" könnten auf technische Aspekte von Energiegewinnung und -verteilung hindeuten.
+19-MTA-KI-02.txt Technologische Aspekte:    - "Games" und "Blockchain" deuten auf technologische Themen hin, möglicherweise im Kontext von E-Government oder digitaler Demokratie.
+17-MTA-KI-01.txt ### Technologie und Infrastruktur  - Strom - Energie  Diese Begriffe beziehen sich auf technische Aspekte und Infrastrukturen, die für den Energiemarkt relevan sind.
+16-MTA-KI-02.txt ### Technologische Aspekte  - "Computer Energieverbrauch" verweist auf technische oder technologische Fragen.
+16-MTA-KI-02.txt Technologische Aspekte und Energieverbrauch 3.
+17-MTA-KI-04.txt Digitalisierung und elektronische Kommunikation: Viele Wörter beziehen sich auf digitale Technologien, wie "elektronischer Anbieter", "E-Mails", "Provider" und "elektronisches Personensstandrecht".
+13-MTA-KI-07.txt Bildungs- und Forschungsbereich: Die Wörter "bildung", "wissenschaft", "technologie" und "forschung" deuten auf einen Schwerpunkt im Bereich der Bildung und des wissenschaftlichen Fortschritts hin.
+18-MTA-KI-04.txt Rhetorische Elemente:    - Begriffe wie "Beifall", "Schlussredner" und "Redner" könnten auf eine Diskussion über Redekunst oder Kommunikationstechniken hindeuten.
+18-MTA-KI-02.txt Wirtschaft und Digitalisierung:    - Das Wort "Unternehmen" weist auf wirtschaftliche Aspekte hin.
+13-MTA-KI-02.txt Redemanipulation: Der Begriff "Zwischenfrage" könnte auf Techniken zur Beeinflussung des Redeflusses hinweisen.
+19-MTA-KI-07.txt Es könnte sich um einen politischen, technischen oder gesellschaftlichen Kontext handeln, der die Akzeptanz und Implementierung von Windkraftanlagen betrifft.
+20-MTA-KI-02.txt ### Gruppe 2: Umwelt- und Nachhaltigkeitsbegriffe  - Grüne - Digitalisierung  Diese beiden Begriffe stehen für umweltfreundliche und technologisch fortschrittliche Konzepte.
+17-MTA-KI-05.txt Gesetzgebung und Entwürfe:    - Gesetzentwurf    - Überweisungsvorschlag  Diese Wörter scheinen sich auf verschiedene Aspekte der politischen Prozesse und Entscheidungsfindung zu beziehen, mit einem Fokus auf technische Sicherheitsfragen, Umweltschutz und finanzielle Angelegenheiten.
+16-MTA-KI-04.txt - Technische Aspekte: "Rechenzentrum" weist auf technische Unterstützung hin.
+17-MTA-KI-03.txt Sie beschreiben Aspekte der modernen Produktionsmethoden und technologischen Fortschritte.
+
+Cluster 2
+19-MTA-KI-07.txt Technologie und IT 4.
+19-MTA-KI-02.txt Technologie und Sicherheit:    - Reaktorsicherheit  3.
+17-MTA-KI-01.txt Technologischer Fortschritt und Innovation 2.
+16-MTA-KI-02.txt Digitalisierung und Technologie 4.
+
+Cluster 3
+19-MTA-KI-07.txt Deutschsprachiger Kontext mit Fokus auf Deutschland  Die thematischen Gemeinsamkeiten liegen hauptsächlich im Bereich der technologischen Entwicklung, industriellen Produktion und digitalen Transformation.
+19-MTA-KI-02.txt Der Fokus liegt klar auf einem wirtschaftlichen und technologisch orientierten Kontext, der sich speziell auf Deutschland und deutsche Unternehmen konzentriert.
+17-MTA-KI-01.txt Informationsaustausch und Kommunikation im politischen Kontext  Die thematischen Gemeinsamkeiten scheinen sich hauptsächlich auf politische Prozesse, technologische Fragen und den Informationsaustausch zu konzentrieren, mit einem Fokus auf die deutsche Sprache und Kultur.
+16-MTA-KI-02.txt Diese thematischen Gemeinsamkeiten scheinen sich auf den Bereich der Bildungs- und Forschungspolitik zu konzentrieren, insbesondere im Kontext einer europäischen Zusammenarbeit, mit einem Fokus auf Technologieforschung und -entwicklung.
+
+Cluster 4
+19-MTA-KI-07.txt - "Digitale Frage" impliziert, dass digitale Themen ein wichtiges Anliegen sind.
+19-MTA-KI-02.txt "Grüne" könnte sich auf grüne Partein oder grüne Initiativen beziehen, während "Digitalisierung" ein zentrales Thema der modernen Gesellschaft darstellt.
+17-MTA-KI-01.txt Diese Gemeinsamkeiten scheinen auf einen Kontext zu deuten, der sich mit rechtlichen, technischen und gesellschaftlichen Aspekten der digitalen Kommunikation und des Datenschutzes beschäftigt.
+
+Cluster 5
+19-MTA-KI-07.txt ### Gruppe 2: Digitalisierung und Innovation  - Digitalisierung - Strategie - Antrag - Internet - Intelligente Systeme  Diese Begriffe stehen für den Prozess der Umwandlung von analoger in digitale Formate und betonen die Rolle von Strategien und Anträgen im Innovationsprozess.
+19-MTA-KI-02.txt ### Gruppe 1: Technologie und Industrie  - High-Tech - Produktion - Fabrik - Maschinen - Forschung - Entwicklung - Zukunft  Diese Wörter sind eng mit der technischen und industriellen Entwicklung verbunden.
+17-MTA-KI-01.txt ### Gruppe 4: Bildung und Forschung  - Forschung - Entwicklung - Wissenschaft  Diese Begriffe betonen die Bedeutung von Bildung und wissenschaftlichen Untersuchungen für den technologischen Fortschritt und Unternehmenserfolg.
+
+Cluster 6
+19-MTA-KI-07.txt Digitale Transformation und Smart Technologies 4.
+19-MTA-KI-02.txt Technologische Aspekte:    - CEBIT: Eine internationale Messe für Informations- und Kommunikationstechnologie    - Computerkollegen: Bezug zur IT-Branche  4.
+
+Cluster 7
+19-MTA-KI-07.txt Schlussfolgerung:    Die thematischen Gemeinsamkeiten liegen vor allem in der Richtung eines politischen oder administrativen Kontexts, der sich um Kommunikation, Entscheidungsprozesse und möglicherweise technische Unterstützung dreht.
+19-MTA-KI-02.txt Allgemeine politische Entscheidungsprozesse und Maßnahmen  Diese Wörter scheinen sich auf verschiedene Aspekte der deutschen Politik und Gesellschaft zu konzentrieren, mit besonderem Fokus auf Umwelt-, Energie- und Technologiepolitik sowie deren Auswirkungen auf die Gesellschaft.
+
+Cluster 8
+19-MTA-KI-07.txt Es gibt auch Anzeichen für technologische Aspekte und gesellschaftliche Themen wie Gesundheitsversorgung.
+19-MTA-KI-02.txt Es gibt auch Hinweise auf technische oder administrative Aspekte (z.B. Rechenzentrum).
