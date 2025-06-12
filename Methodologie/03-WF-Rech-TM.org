@@ -82,9 +82,9 @@ Ein solches Ergebnis zeigt, dass wir viel Rausch in unserer Topic-Modell-Analyse
 
 * Ziel 2. Spezifische Themen zum Oberthema Rechenzentren in Deutschland
 
-Ähnlich wie bei unserem 'tesi' Code-Block bereiten wir einen Code-Block für die automatische Durchführung des SCT.py-Skript. Im Unterschied zu 'tesi' Code-Block brauchen wir keine Variable für den Pfad zu den Stopwords zu definieren, da unser Skript keine Stopword benutzt. Wir definieren Wörter und Wörterwurzel, die wir den SCT.py-Skript senden, damit er die Sätze in den Berichten zu den Topics aufnimmt, die diese Wörter und entsprechende Wörter mit dem gegebenen Wurzel enthalten. Wir geben weiter die minimale Anzahl an Sätzen je Cluster, die wir bilden wollen (hier 2, weil wir wenige Dokumente haben), und wir geben das Koeffizient zwischen 0.0 und 0.99 für die Verbindung zwischen Sätzen an. Je höher dieses Koeffizient ist, desto enger sind die Sätzen inhaltlich verbunden. Da wir im Ziel 1 gesehen haben, dass das Thema Rechenzentren wahrscheinlich wenig in die Debatten des Bundestages auftaucht, die wir modelliert haben, wählen wir ein Koeffizient von 0.4 für eine schwache jedoch nicht zufällige inhaltliche Verbindung zwischen Sätzen, die die Cluster bilden.
+Ähnlich wie bei unserem 'tesi' Code-Block bereiten wir einen Code-Block für die automatische Durchführung des SCT.py-Skript vor. Im Unterschied zum 'tesi' Code-Block brauchen wir keine Variable für den Pfad zu den Stopwords zu definieren, da unser Skript keine Stopword benutzt. Wir definieren Wörter und Wörterwurzel, die wir den SCT.py-Skript senden, damit er die Sätze in den Berichten zu den Topics aufnimmt, die diese Wörter und entsprechende Wörter mit der gegebenen Wurzel enthalten. Wir geben weiter die minimale Anzahl an Sätzen je Cluster, die wir bilden wollen (hier 2, weil wir wenige Dokumente haben), und wir geben das Koeffizient zwischen 0.0 und 0.99 für die Verbindung zwischen Sätzen an. Wenn dieses Koeffizient hoch ist, dann sucht SBERT nach Sätzen, die inhaltlich eng miteinander verbunden sind. Da wir im Ziel 1 gesehen haben, dass das Thema Rechenzentren wahrscheinlich eher am Rande der Debatten des Bundestages auftaucht, die wir modelliert haben, wählen wir ein Koeffizient von 0.4 für eine schwache jedoch nicht zufällige inhaltliche Verbindung zwischen Sätzen, die die Cluster bilden.
 
-Wir können den Code-Block 'sct' mit diesen Informationen herstellen:
+Wir können den Code-Block 'sct' mit diesen Informationen herstellen und ausführen:
 
 #+name: sct
 #+begin_src shell :var mtaki="/home/cpsoz/ROM-Data/TM-Analyse/MTA-KI" :var user=nuser :var stopw=stops  :results none
@@ -96,9 +96,10 @@ Wir können den Code-Block 'sct' mit diesen Informationen herstellen:
   echo "2" >> $user/BERT-Skripten/sct.txt
   echo "2" >> $user/BERT-Skripten/sct.txt
   echo "0.4" >> $user/BERT-Skripten/sct.txt
-  cat $user/BERT-Skripten/sct.txt | python3 $user/BERT-Skripten/TeSi.py
+  cat $user/BERT-Skripten/sct.txt | python3 $user/BERT-Skripten/SCT.py
 #+end_src
 
+Entsprechend erhalten wir die Cluster mit variablen Sätzen, die SBERT mit einem Koeffizient von 0.4 miteinander verbindet.
 
 a=`awk '{print $1}' Clusters_Years-11_06_2025_14_12_09.txt`
 b=`awk -F, '{print $1}' Corr_02_11_06_2025_14_17_53.csv
