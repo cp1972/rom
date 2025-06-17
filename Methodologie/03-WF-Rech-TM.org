@@ -307,8 +307,10 @@ Einmal die Kontrolle der Berichte erfolgt, bilden wir die für das Thema der Rec
   cp Dominant_Topics_NMF_*.csv $mtares/DT.csv
 #+end_src
 
-#+name: trends
-#+begin_src python :var dt="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/DT.csv"  :results Trends.pdf file
+Wir bilden einmal alle neun Topics ab:
+
+#+name: trends-9t
+#+begin_src python :var dt="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/DT.csv" :var saveplot="/home/cpsoz/ROM-Data/BERT-Analyse/Trends9T.pdf" :results Trends9T.pdf file
   import matplotlib.pyplot as plt
   import matplotlib.patches as mpatches
   import numpy as np
@@ -319,10 +321,11 @@ Einmal die Kontrolle der Berichte erfolgt, bilden wir die für das Thema der Rec
 
   # Schrift
   #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-  rc('font',**{'family':'serif','serif':['Times'],'size':10})
+  rc('font',**{'family':'serif','serif':['Times'],'size':9})
   rc('text', usetex=True)
 
-  path = $dt
+  path = dt
+  pathplot = saveplot
   df = pd.read_csv(path)
   df.rename(columns={ df.columns[0]: "Dokumente" }, inplace = True)
   df.drop('Dominant_Topic_NMF', axis=1, inplace=True)
@@ -333,40 +336,123 @@ Einmal die Kontrolle der Berichte erfolgt, bilden wir die für das Thema der Rec
   df['Proto']= df['Proto'].map(lambda x: str(x)[6:14])
   df_trends = df.sort_values(by='Jahr',ascending=True)
 
-  df_trends['Verteidigung'] = df_trends['0'].rolling(15).mean()
-  df_trends['Hessen'] = df_trends['1'].rolling(15).mean()
-  df_trends['Forsch/Wiss.'] = df_trends['2'].rolling(15).mean()
-  df_trends['Apotheken/Med.'] = df_trends['3'].rolling(15).mean()
-  df_trends['Energie/Strom/Wirt.'] = df_trends['4'].rolling(15).mean()
-  df_trends['Datenschutz'] = df_trends['6'].rolling(15).mean()
-  df_trends['Darmstadt/Bildung/Forsch.'] = df_trends['7'].rolling(15).mean()
-  df_trends['Energie/Wirt./Optim./Nachhalt.'] = df_trends['8'].rolling(15).mean()
-  df_trends['Apotheken/Krankenkass./Med.'] = df_trends['9'].rolling(15).mean()
+  df_trends['Verteidigung'] = df_trends['0'].rolling(25).mean()
+  df_trends['Hessen'] = df_trends['1'].rolling(25).mean()
+  df_trends['Forsch/Wiss.'] = df_trends['2'].rolling(25).mean()
+  df_trends['Apotheken/Med.'] = df_trends['3'].rolling(25).mean()
+  df_trends['Energie/Strom/Wirt.'] = df_trends['4'].rolling(25).mean()
+  df_trends['Datenschutz'] = df_trends['6'].rolling(25).mean()
+  df_trends['Darmstadt/Bildung/Forsch.'] = df_trends['7'].rolling(25).mean()
+  df_trends['Energie/Wirt./Optim./Nachhalt.'] = df_trends['8'].rolling(25).mean()
+  df_trends['Apotheken/Krankenkass./Med.'] = df_trends['9'].rolling(25).mean()
 
-  sns.lineplot(x="Jahr",y="RM",
-           label="Trendthema Var_comment", data=df_comment,
-           ci=None, color='darkolivegreen')
-  sns.lineplot(x="Jahr",y="RM",
-           label="Trendthema Var_decmeth", data=df_decmeth,
-           ci=None, color='darkred')
-  sns.lineplot(x="Jahr",y="RM",
-           label="Trendthema Var_roleissue", data=df_roleissue,
-           ci=None, color='steelblue')
-  sns.lineplot(x="Jahr",y="RM",
-           label="Trendthema Var_selectcrit", data=df_selectcrit,
-           ci=None, color='darkgoldenrod')
-  sns.lineplot(x="Jahr",y="RM",
-           label="Trendthema Var_rolename", data=df_selectcrit,
-           ci=None, color='darkorange')
+  sns.lineplot(x="Jahr",y="Verteidigung",
+           label="Verteidigung", data=df_trends,
+           ci=None, color='#001219')
+  sns.lineplot(x="Jahr",y="Hessen",
+           label="Hessen", data=df_trends,
+           ci=None, color='#005f73')
+  sns.lineplot(x="Jahr",y="Forsch/Wiss.",
+           label="Forsch/Wiss.", data=df_trends,
+           ci=None, color='#0a9396')
+  sns.lineplot(x="Jahr",y="Apotheken/Med.",
+           label="Apotheken/Med.", data=df_trends,
+           ci=None, color='#94d2bd')
+  sns.lineplot(x="Jahr",y="Energie/Strom/Wirt.",
+           label="Energie/Strom/Wirt.", data=df_trends,
+           ci=None, color='#e9d8a6')
+  sns.lineplot(x="Jahr",y="Datenschutz",
+           label="Datenschutz", data=df_trends,
+           ci=None, color='#ee9b00')
+  sns.lineplot(x="Jahr",y="Darmstadt/Bildung/Forsch.",
+           label="Darmstadt/Bildung/Forsch.", data=df_trends,
+           ci=None, color='#ca6702')
+  sns.lineplot(x="Jahr",y="Energie/Wirt./Optim./Nachhalt.",
+           label="Energie/Wirt./Optim./Nachhalt.", data=df_trends,
+           ci=None, color='#bb3e03')
+  sns.lineplot(x="Jahr",y="Apotheken/Krankenkass./Med.",
+           label="Apotheken/Krankenkass./Med.", data=df_trends,
+           ci=None, color='#ae2012')
+
   plt.legend(loc=2, prop={'size':14}, bbox_to_anchor=(1,1),ncol=1)
   plt.ylabel('Rollender Durchschnitt')
   plt.xlabel('Jahre')
   plt.xticks(rotation=45, ha="right")
 
-  plt.savefig('/home/cpsoz/Github/minipublic/images/Trends.pdf', dpi=300, bbox_inches='tight')
-  return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
+  plt.savefig(pathplot, dpi=300, bbox_inches='tight')
+  #return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
 #+end_src
 
+Wir stellen ähnliche Topics zusammen und bilden dann die übrigen Topics ab:
+
+#+name: trends-7t
+#+begin_src python :var dt="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/DT.csv" :var saveplot="/home/cpsoz/ROM-Data/BERT-Analyse/Trends7T.pdf" :results Trends7T.pdf file
+  import matplotlib.pyplot as plt
+  import matplotlib.patches as mpatches
+  import numpy as np
+  import seaborn as sns
+  import pandas as pd
+  import csv
+  from matplotlib import rc
+
+  # Schrift
+  #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+  rc('font',**{'family':'serif','serif':['Times'],'size':9})
+  rc('text', usetex=True)
+
+  path = dt
+  pathplot = saveplot
+  df = pd.read_csv(path)
+  df.rename(columns={ df.columns[0]: "Dokumente" }, inplace = True)
+  df.drop('Dominant_Topic_NMF', axis=1, inplace=True)
+  df['Jahr'] = df['Dokumente']
+  df['Proto'] = df['Dokumente']
+  df['Jahr']= df['Jahr'].map(lambda x: str(x)[0:4])
+  df['Jahr'].astype(int)
+  df['Proto']= df['Proto'].map(lambda x: str(x)[6:14])
+  df_trends = df.sort_values(by='Jahr',ascending=True)
+  df_trends['Apo/Med'] = df_trends[['3', '9']].mean(axis=1)
+  df_trends['Energie/Wirt.'] = df_trends[['4', '8']].mean(axis=1)
+
+
+  df_trends['Verteidigung'] = df_trends['0'].rolling(25).mean()
+  df_trends['Hessen'] = df_trends['1'].rolling(25).mean()
+  df_trends['Forsch/Wiss.'] = df_trends['2'].rolling(25).mean()
+  df_trends['Apotheken/Med.'] = df_trends['Apo/Med'].rolling(25).mean()
+  df_trends['Datenschutz'] = df_trends['6'].rolling(25).mean()
+  df_trends['Darmstadt/Bildung/Forsch.'] = df_trends['7'].rolling(25).mean()
+  df_trends['Energie/Wirt./Optim./Nachhalt.'] = df_trends['Energie/Wirt.'].rolling(25).mean()
+
+  sns.lineplot(x="Jahr",y="Verteidigung",
+           label="Verteidigung", data=df_trends,
+           ci=None, color='#001219')
+  sns.lineplot(x="Jahr",y="Hessen",
+           label="Hessen", data=df_trends,
+           ci=None, color='#005f73')
+  sns.lineplot(x="Jahr",y="Forsch/Wiss.",
+           label="Forsch/Wiss.", data=df_trends,
+           ci=None, color='#0a9396')
+  sns.lineplot(x="Jahr",y="Apotheken/Med.",
+           label="Apotheken/Med.", data=df_trends,
+           ci=None, color='#94d2bd')
+  sns.lineplot(x="Jahr",y="Datenschutz",
+           label="Datenschutz", data=df_trends,
+           ci=None, color='#ee9b00')
+  sns.lineplot(x="Jahr",y="Darmstadt/Bildung/Forsch.",
+           label="Darmstadt/Bildung/Forsch.", data=df_trends,
+           ci=None, color='#ca6702')
+  sns.lineplot(x="Jahr",y="Energie/Wirt./Optim./Nachhalt.",
+           label="Energie/Wirt./Optim./Nachhalt.", data=df_trends,
+           ci=None, color='#bb3e03')
+
+  plt.legend(loc=2, prop={'size':14}, bbox_to_anchor=(1,1),ncol=1)
+  plt.ylabel('Rollender Durchschnitt')
+  plt.xlabel('Jahre')
+  plt.xticks(rotation=45, ha="right")
+
+  plt.savefig(pathplot, dpi=300, bbox_inches='tight')
+  #return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
+#+end_src
 
 * Fazit
 
