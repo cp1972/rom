@@ -46,6 +46,13 @@ Dann schreiben wir den 'bert-rech.sh' Skript:
   chmod +x $user/bert-rech.sh
 #+end_src
 
+#+begin_src shell :results silent :var user=nuser
+  touch $user/bert-rech.sh
+  echo "#!/bin/bash" >> $user/bert-rech.sh
+  echo "emacs /home/cpsoz/Gitub/rom/Methodologie/03-WF-Rech-TM.org --batch -l /home/cpsoz/.emacs.d/init.el --eval \"(setq org-confirm-babel-evaluate nil)\" --eval \"(org-babel-execute-buffer)\"" >> $user/bert-rech.sh
+  chmod +x $user/bert-rech.sh
+#+end_src
+
 Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash bert-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem bert-rech.sh sich befindet).
 
 Im Rahmen dieser Analyse verwenden wir einen ersten python-Skript für die Berechnung der Ähnlichkeit zwischen den Berichten der KI (TeSi.py) und einen zweiten python-Skript für die semantischen Ähnlichkeiten zwischen Sätzen aus diesen Berichten (SCT.py). Beide Skripten befinden sich in einem Ordner 'Workflow_RES', weshalb wir sie zu unserem Ordner 'BERT-Skripten' kopieren
@@ -453,9 +460,3 @@ Wir stellen ähnliche Topics zusammen und bilden dann die übrigen Topics ab:
   plt.savefig(pathplot, dpi=300, bbox_inches='tight')
   #return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
 #+end_src
-
-* Fazit
-
-Mit diesem zweiten Workflow haben wir eine Modellierung des allgemeinen Kontextes der Debatten im Bundestag zum Thema Rechenzentren in Deutschland für die Zeit von 1949 bis 2025 vorgeschlagen. Wie hilfreich eine solche Modellierung ist, untersuchen wir in einem dritten Workflow. In diesem dritten Workflow analysieren wir die Ähnlichkeiten zwischen Themen in den unterschiedlichen Wahlperioden, was uns erlaubt, wiederholende Themen in der Zeit von 1949 bis 2025 zu erkennen, sowie die Entstehung von neuen Themen und das Verschwinden von alten Themen zu datieren.
-
-In diesem Zusammenhang werden wir uns fragen, ob die vorhandene Information ausreicht, um das Thema der Rechenzentren in Deutschland besser zu verstehen, oder ob wir gezielt eine eingeschränkte Anzahl an Dateien modellieren sollten, um mehr bzw. präzisere Informationen zu diesem Thema zu erhalten.

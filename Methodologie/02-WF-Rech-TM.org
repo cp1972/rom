@@ -36,10 +36,7 @@ Dann schreiben wir den 'tm-rech.sh' Skript:
 #+begin_src shell :results silent :var user=nuser
   touch $user/tm-rech.sh
   echo "#!/bin/bash" >> $user/tm-rech.sh
-  echo 'emacs --batch \' >> $user/tm-rech.sh
-  echo "      --eval \"(require 'org)\" \ " >> $user/tm-rech.sh
-  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/tm-rech.sh
-  echo "      --eval '(org-babel-tangle-file \"02-WF-Rech-TM.org\")' \ " >> $user/tm-rech.sh
+  echo "emacs /home/cpsoz/Gitub/rom/Methodologie/02-WF-Rech-TM.org --batch -l /home/cpsoz/.emacs.d/init.el --eval \"(setq org-confirm-babel-evaluate nil)\" --eval \"(org-babel-execute-buffer)\"" >> $user/tm-rech.sh
   chmod +x $user/tm-rech.sh
 #+end_src
 
@@ -557,3 +554,5 @@ An diesem Punkt empfiehlt sich, die Interpretation durch die KI zu kontrollieren
 Mit diesem zweiten Workflow haben wir eine Modellierung des allgemeinen Kontextes der Debatten im Bundestag zum Thema Rechenzentren in Deutschland für die Zeit von 1949 bis 2025 vorgeschlagen. Wie hilfreich eine solche Modellierung ist, untersuchen wir in einem dritten Workflow. In diesem dritten Workflow analysieren wir die Ähnlichkeiten zwischen Themen in den unterschiedlichen Wahlperioden, was uns erlaubt, wiederholende Themen in der Zeit von 1949 bis 2025 zu erkennen, sowie die Entstehung von neuen Themen und das Verschwinden von alten Themen zu datieren.
 
 In diesem Zusammenhang werden wir uns fragen, ob die vorhandene Information ausreicht, um das Thema der Rechenzentren in Deutschland besser zu verstehen, oder ob wir gezielt eine eingeschränkte Anzahl an Dateien modellieren sollten, um mehr bzw. präzisere Informationen zu diesem Thema zu erhalten.
+
+Dies erfolgt im einem [[file+sys:~/Github/rom/Methodologie/03-WF-Rech-TM.org][dritten Workflow]].
