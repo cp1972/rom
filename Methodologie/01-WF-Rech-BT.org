@@ -34,11 +34,13 @@ Dann schreiben wir den 'datab-rech.sh' Skript:
 
 #+begin_src shell :results silent :var user=user-path
   touch $user/datab-rech.sh
-  echo "emacs /home/cpsoz/WF-WK-essai.org --batch -l /home/cpsoz/.emacs.d/init.el --eval "(setq org-confirm-babel-evaluate nil)" --eval "(org-babel-execute-buffer)"" >> $user/datab-rech.sh
+  echo "#!/bin/bash" >> $user/datab-rech.sh
+  echo "emacs /home/cpsoz/Gitub/rom/Methodologie/01-WF-Rech-BT.org --batch -l /home/cpsoz/.emacs.d/init.el --eval \"(setq org-confirm-babel-evaluate nil)\" --eval \"(org-babel-execute-buffer)\"" >> $user/datab-rech.sh
   chmod +x $user/datab-rech.sh
 #+end_src
 
 Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, etwa: bash datab-rech.sh
+WICHTIG!!!: Damit Pfade korrekt erkannt werden, müssen all die möglichen :results output silenced werden bzw. mussen keine output geschrieben werden, also :results silent
 
 Zuerst behandeln wir die Parlamentsdokumente.
 
