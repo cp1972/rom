@@ -60,4 +60,5 @@ zum Betrieb notwendige Infrastruktur) einer oder mehrerer Firmen oder Organisati
   | EU       |        330.000 |          7.560.072 |                         23 |                     90 |
   | Welt     |      3.000.000 |         32.000.000 |                         11 |                     90 |
 
-- Für die US gibt es erste Statistiken ab 2007 (ebd.); dort sieht man, dass RZ
+- Für die US gibt es erste Statistiken ab 2007 (ebd.); dort sieht man, dass RZ nach der räumlichen Definition von Fichter 2/3 aller Servereinrichtungen betragen, die in den US vorhanden sind.
+- interessant ist hier auch die Historie der Forschung an RZ im Rahmen von IKT-Forschern (die mehrheitlich Ingenieure sind), die schon 1990 anfängt; erste Berichte werden von der ETH-Zürich für die Schweiz bis 2011 entwickelt bzw. bis Pensionierung des Hauptredakteurs von solchen Berichten Aebischer
