@@ -1,26 +1,26 @@
 * Deutung der allgemeinen Themen im Rahmen der politischen Debatten zu Rechenzentren in Deutschland
 
-Dieses Dokument stellt ein Workflow zur Deutung der allgemeinen Themen im Rahmen der politischen Debatten zu Rechenzentren in Deutschland dar. Wir verwenden die Ergebnisse aus unserem [[file:02-WF-Rech-BT.org][zweiten Workflow]] zur Topic-Modell-Analyse der Debatten zu Rechenzentren in Deutschland. Wie unsere zwei ersten Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+Dieses Dokument stellt ein /workflow/ zur Deutung der allgemeinen Themen im Rahmen der Debatten zu Rechenzentren im deutschen Bundestag/Parlament dar. Wir verwenden die Ergebnisse aus unserem [[file:02-WF-Rech-BT.org][zweiten workflow]] zur Topic-Modell-Analyse dieser Dokumente. Wie unsere zwei ersten /workflow/ kann dieses /workflow/ als Anwendung verwendet werden (s. u.).
 
 ** Vorgehen
 
-Am Ende von unserer Topic-Modell-Analyse haben wir die Ergebnisse bzw. die Topics jeder Wahlperiode zu einer KI gesendet, die die Zusammenstellung von Begriffen nach gemeinsamer Bedeutung prüfen sollte. Die Berichte der KI haben wir gelesen und korrigiert haben, wo es sein musste. Diese Berichte wollen wir mit zwei Zielen behandeln:
+Am Ende von unserer Topic-Modell-Analyse haben wir die Ergebnisse bzw. die Topics für jede Wahlperiode zu einer KI gesendet, die die Zusammenstellung von Begriffen nach gemeinsamer Bedeutung prüfen sollte. Die Berichte der KI haben wir gelesen und korrigiert. Diese Berichte wollen wir mit den zwei folgenden Zielen weiter behandeln:
 
-- Ziel 1: welche -- wichtige bzw. zentrale oder unwichtige bzw. nicht zentrale --  Bedeutung solche Rahmenthemen in diesen Debatten gehabt haben? Zur Beantwortung dieser Frage vergleichen wir die Dokumente miteinander. Diese Analyse versucht Ähnlichkeiten zwischen Dokumenten zu vergleichen.
-- Ziel 2: im Rahmen der Debatten, die mit Bezug auf die Rechenzentren in Deutschland entwickelt wurden, können spezifischere Rahmenthemen erkannt werden? Zur Beantwortung dieser Frage vergleichen wir die Sätze der Dokumente miteinander, um ähnliche semantischen Sätze in Clusters ohne Berücksichtigung derer Angehörigkeit zu bestimmten Dokumenten zu klassifizieren.
+- *Ziel 1*: welches Bedeutung schreibt die KI den Themen zu, die aus der Topic-Modell-Analyse erkannt worden sind, und sieht man dort Ähnlichkeiten? Zur Beantwortung dieser Frage vergleichen wir die KI-Berichte miteinander.
+- *Ziel 2*: gibt es unter diesen Themen manche, die besonders relevant für unsere Analyse sind? Zur Beantwortung dieser Frage vergleichen wir jede Sätze aus den KI-Berichten miteinander.
 
-Wir vergleichen dann beide Ergebnisse (Ähnlichkeit der Dokumente und Ähnlichkeit der Sätze), um den Platz deuten zu können, den spezifische Themen zu Rechenzentren in den Protokollen des Bundestages von 1949 bis heute gehabt haben bzw. um ihren Gewicht in den Debatten des Bundestages auf lange Sicht besser verstehen zu können.
+Wir vergleichen dann beide Ergebnisse (Vergleich der KI-Berichte bzw. der Sätze in diesen Berichten), um das Gewicht deuten zu können, das spezifische Themen zu Rechenzentren in den Protokollen des Bundestages von 1949 bis heute gehabt haben.
 
-** Dieses Workflow als Anwendung benutzen
+** Dieses /workflow/ als Anwendung benutzen
 
-Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'bert-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+Dieses /workflow/ kann wie eine Anwendung mit dem folgenden Skript 'bert-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block schaffen (Pfad anpassen):
 
 #+name: user-path
 #+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
   mkdir $user/BERT-Analyse
 #+end_src
 
-Unsere Analyse wird in diesem Ordner 'BERT-Analyse' stattfinden. Dort stellen wir einen Ordner 'BERT-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'BERT-Analyse' als neuen Benutzerpfad:
+Unsere Analyse wird in diesem Ordner 'BERT-Analyse' stattfinden. Dort stellen wir einen Ordner 'BERT-Skripten' für die Skripten, die wir im Rahmen von diesem /workflow/ schreiben, und wir definieren den vollständigen Pfad zum Ordner 'BERT-Analyse' als neuen Benutzerpfad (Pfad anpassen):
 
 #+name: nuser
 #+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/BERT-Analyse" :results silent
@@ -32,19 +32,7 @@ Unsere Analyse wird in diesem Ordner 'BERT-Analyse' stattfinden. Dort stellen wi
   mkdir $userpath/BERT-Skripten
 #+end_src
 
-Wichtig: wie in den zwei ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
-
-Dann schreiben wir den 'bert-rech.sh' Skript:
-
-#+begin_src shell :results silent :var user=nuser
-  touch $user/bert-rech.sh
-  echo "#!/bin/bash" >> $user/bert-rech.sh
-  echo 'emacs --batch \' >> $user/bert-rech.sh
-  echo "      --eval \"(require 'org)\" \ " >> $user/bert-rech.sh
-  echo "      --eval \"(setq org-confirm-babel-evaluate nil)\" \ " >> $user/bert-rech.sh
-  echo "      --eval '(org-babel-tangle-file \"03-WF-Rech-TM.org\")' \ " >> $user/bert-rech.sh
-  chmod +x $user/bert-rech.sh
-#+end_src
+Dann schreiben wir den Inhalt vom 'bert-rech.sh' Skript im Skript selbst:
 
 #+begin_src shell :results silent :var user=nuser
   touch $user/bert-rech.sh
@@ -53,25 +41,25 @@ Dann schreiben wir den 'bert-rech.sh' Skript:
   chmod +x $user/bert-rech.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash bert-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem bert-rech.sh sich befindet).
+Dieser Skript führt alle Code-Blöcke in diesem /workflow/ aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash bert-rech.sh oder ./bert-rech.sh.
 
-Im Rahmen dieser Analyse verwenden wir einen ersten python-Skript für die Berechnung der Ähnlichkeit zwischen den Berichten der KI (TeSi.py) und einen zweiten python-Skript für die semantischen Ähnlichkeiten zwischen Sätzen aus diesen Berichten (SCT.py). Beide Skripten befinden sich in einem Ordner 'Workflow_RES', weshalb wir sie zu unserem Ordner 'BERT-Skripten' kopieren
+In diesem /workflow/ verwenden wir einen ersten python-Skript für die Berechnung der Ähnlichkeit zwischen den KI-Berichten (TeSi.py) und einen zweiten python-Skript für die semantischen Ähnlichkeiten zwischen Sätzen aus diesen Berichten (SCT.py). Beide Skripten befinden sich in einem Ordner 'Workflow_RES', weshalb wir sie zu unserem Ordner 'BERT-Skripten' kopieren (Pfad anpassen):
 
 #+name: bert-copy
 #+begin_src shell :var mtap="/home/cpsoz/Workflow_RES" :var user=nuser :results silent
   cp $mtap/TeSi.py $user/BERT-Skripten && cp $mtap/SCT.py $user/BERT-Skripten
 #+end_src
 
-* Ziel 1. Bedeutung von Rahmenthemen zum Thema Rechenzentren in Deutschland
+* Ziel 1. Vergleich der KI-Berichte miteinander
 
-Um unser erstes Ziel zu erreichen, verwenden wir unseren TeSi.py-Skript auf die Berichte der KI. Da TeSi stopwords braucht, um die Analyse durchzuführen, schreiben wir einen Code-Block zum Pfad der Stopwords auf unserem Rechner:
+Um unser erstes Ziel zu erreichen, verwenden wir unseren TeSi.py-Skript auf die KI-Berichte. Da TeSi stopwords braucht, um die Analyse durchzuführen, schreiben wir einen Code-Block zum Pfad der Stopwords auf unserem Rechner (Pfad anpassen):
 
 #+name: stops
 #+begin_src shell :var stopwords="/home/cpsoz/Org/Stopwords" :results silent
   echo $stopwords
 #+end_src
 
-Dann verwenden wir TeSi automatisch mit einer Datei 'tesi.txt', in der wir die Befehle schreiben, die TeSi braucht, um die Analyse durchzuführen; anschließend führen wir diese Analyse durch:
+Dann verwenden wir TeSi automatisch mit einer Datei 'tesi.txt', in der wir die Befehle schreiben, die TeSi braucht, um die Analyse durchzuführen; anschließend führen wir diese Datei aus:
 
 #+name: tesi
 #+begin_src shell :var mtaki="/home/cpsoz/ROM-Data/TM-Analyse/MTA-KI" :var user=nuser :var stopw=stops mtadir="/home/cpsoz/Github/rom/Methodologie" :results none
@@ -84,15 +72,15 @@ Dann verwenden wir TeSi automatisch mit einer Datei 'tesi.txt', in der wir die B
   mv $mtadir/TeSi-Results* $user/
 #+end_src
 
-Damit haben wir eine bessere Sicht zu den Berichten der KI, die wenige Ähnlichkeiten zwischen Berichten zeigt -- die interessantesten Ergebnisse betreffen die Datei mit Ähnlichkeiten von 0.2 bis 0.29 auf einer Skala von 0.0 bis 1.0. Dort befinden sich schwache Verbindungen zwischen Berichten, die jedoch nicht zufällig entstanden sind. Über 0.3 gibt es eine Verbindung zwischen zwei Berichten mit einer Ähnlichkeit zwischen 0.4 bis 0.49, die jedoch das Thema der Rechenzentren oder Themen, die damit verbunden wären (wie Technologie, Rechner, Fortschritt usw.) nicht betreffen. Unter 0.2 gibt es sehr viele Verbindungen zwischen Berichten, die jedoch von weniger Relevanz sind, da es hier davon ausgegangen kann, dass solche Verbindungen aufgrund von sehr allgemeinen Merkmalen der Berichte der KI hergestellt werden (etwa es sind wahrscheinlich Protokolle von Debatten auf der politischen Ebene, die Themen der Wirtschaft, der Wissenschaft usw. betreffen).
+Das Ergebnis zeigt wenige Ähnlichkeiten zwischen den KI-Berichten -- die interessantesten Ergebnisse betreffen die Dateien mit Ähnlichkeiten von 0.2 bis 0.29 auf einer 0-1 Skala. Über diese Werte gibt es eine Verbindung zwischen zwei Berichten mit einer Ähnlichkeit zwischen 0.4 bis 0.49, die jedoch das Thema der Rechenzentren oder Themen, die damit verbunden wären (wie Technologie, Rechner, Fortschritt usw.) nicht betreffen. Unter dem Wert von 0.2 gibt es sehr viele Verbindungen zwischen KI-Berichten, die jedoch allgemeine Elemente der KI-Deutung betreffen und mit dem Thema 'Rechenzentrum' nicht verbunden sind.
 
-Ein solches Ergebnis zeigt, dass wir viel Rausch in unserer Topic-Modell-Analyse haben bzw. dass das Thema Rechenzentren in Deutschland wahrscheinlich nur eine bescheidene Rolle spielt in den Debatten im Bundestag. Dies wollen wir jetzt vertiefen, und dafür wenden wir eine Analyse der semantischen Bedeutung der Berichte. Sie wird uns zum Ziel 2 bringen.
+Ein solches Ergebnis zeigt, dass wir viel Rausch in unserer Topic-Modell-Analyse haben bzw. dass das Thema Rechenzentren in Deutschland wahrscheinlich nur eine kleine Rolle in den Debatten im Bundestag/im Parlament spielt. Dies wollen wir jetzt vertiefen, und dafür wenden wir eine Analyse der semantischen Bedeutung der Berichte auf der Ebene von deren jeweiligen Sätzen (Ziel 2).
 
-* Ziel 2. Spezifische Themen zum Oberthema Rechenzentren in Deutschland
+* Ziel 2. Spezifische Themen zum Thema Rechenzentren in Deutschland
 
-Ähnlich wie bei unserem 'tesi' Code-Block bereiten wir einen Code-Block für die automatische Durchführung des SCT.py-Skript vor. Im Unterschied zum 'tesi' Code-Block brauchen wir keine Variable für den Pfad zu den Stopwords zu definieren, da unser Skript keine Stopword benutzt. Wir definieren Wörter und Wörterwurzel, die wir den SCT.py-Skript senden, damit er die Sätze in den Berichten zu den Topics aufnimmt, die diese Wörter und entsprechende Wörter mit der gegebenen Wurzel enthalten. Wir geben weiter die minimale Anzahl an Sätzen je Cluster, die wir bilden wollen (hier 2, weil wir wenige Dokumente haben), und wir geben das Koeffizient zwischen 0.0 und 0.99 für die Verbindung zwischen Sätzen an. Wenn dieses Koeffizient hoch ist, dann sucht SBERT nach Sätzen, die inhaltlich eng miteinander verbunden sind. Da wir im Ziel 1 gesehen haben, dass das Thema Rechenzentren wahrscheinlich eher am Rande der Debatten des Bundestages auftaucht, die wir modelliert haben, wählen wir ein Koeffizient von 0.4 für eine schwache jedoch nicht zufällige inhaltliche Verbindung zwischen Sätzen, die die Cluster bilden.
+Ähnlich wie bei unserem 'tesi' Code-Block bereiten wir einen Code-Block für die automatische Durchführung des SCT.py-Skript vor. Im Unterschied zum 'tesi' Code-Block brauchen wir keine Variable für den Pfad zu den Stopwords, weil wir keine Stopword benutzen. Wir definieren Wörter und Wörterwurzel, die wir dem SCT.py-Skript senden, damit er die Sätze in den KI-Berichten zu den Topics aufnimmt, die diese Wörter und entsprechende Wörter mit der gegebenen Wurzel enthalten. Wir geben weiter die minimale Anzahl an Sätzen je Cluster, die wir bilden (hier 2, weil wir wenige Dokumente haben), und wir definieren einen Koeffizient mit einem Wert zwischen 0.0 und 0.99, der besagt, welche Ähnlichkeiten die Sätze haben können, um im selben Cluster zusammengefügt zu werden. Wenn dieser Koeffizient hoch ist, dann sucht SBERT nach Sätzen, die inhaltlich eng miteinander verbunden sind. Weil wir im Ziel 1 gesehen haben, dass das Thema Rechenzentren wenig Bedeutung für die Debatten des Bundestages/des Parlaments hat, wählen wir ein Koeffizient von 0.4 für eine schwache jedoch nicht zufällige inhaltliche Verbindung zwischen Sätzen.
 
-Wir können den Code-Block 'sct' mit diesen Informationen herstellen und ausführen:
+Wir können den Code-Block 'sct' mit diesen Informationen schreiben und ausführen:
 
 #+name: sct
 #+begin_src shell :var mtaki="/home/cpsoz/ROM-Data/TM-Analyse/MTA-KI" :var user=nuser mtadir="/home/cpsoz/Github/rom/Methodologie" :results none
@@ -121,7 +109,7 @@ Entsprechend erhalten wir die Cluster mit variablen Sätzen, die SBERT mit einem
   cat $user_res/comp_1 $user_res/comp_2 | awk '!seen[$0]++' > $user_res/comp_3.csv && rm $user_res/comp_1 $user_res/comp_2
 #+end_src
 
-Um eine visuelle Darstellung des Ergebnisses von diesem Vergleich herzustellen, schreiben wir den folgenden Code-Block zur Hervorhebung der konvergenten Gemeinsamkeiten aus dem ersten und dem zweiten Ziel, den wir dann zu einem Skript tangeln (mit C-c C-v t):
+Um eine visuelle Darstellung dieses Vergleichs aufzubauen, schreiben wir den folgenden Code-Block zur Hervorhebung der konvergierenden Gemeinsamkeiten aus dem ersten und dem zweiten Ziel, den wir dann als python-Skript speichern:
 
 #+name: convergences
 #+begin_src python :tangle /home/cpsoz/ROM-Data/BERT-Analyse/BERT-Skripten/Pdf_high.py :results silent
@@ -145,7 +133,7 @@ Um eine visuelle Darstellung des Ergebnisses von diesem Vergleich herzustellen, 
   pdf_plot.save(outgoing)
 #+end_src
 
-Wir führen dann den Vergleich durch, den wir als die Netzwerkkarte 'Network_highlight.pdf' abdrucken:
+Wir bauen die Abbildung bzw. die Netzwerkkarte 'Network_highlight.pdf' auf:
 
 #+name: pdf_plot_highlight
 #+begin_src shell :var tesipath="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results none
@@ -157,16 +145,15 @@ Wir führen dann den Vergleich durch, den wir als die Netzwerkkarte 'Network_hig
   cat $user/BERT-Skripten/pdf_high.txt | python3 $user/BERT-Skripten/Pdf_high.py
 #+end_src
 
-Das Ergebnis bestätigt, dass wir viel Rausch in unseren Daten haben, selbst wenn bestimmte Themen zu Rechenzentren auftauchen und eine unterschiedliche Bedeutung zeigen:
+Das Ergebnis bestätigt, dass wir viel Rausch in unseren Daten haben, selbst wenn einige Themen zu Rechenzentren auftauchen:
 
-- Topics 3 der 13 WP und 4 der 18 WP sind mit wichtigen Themen der Debatten in BT verbunden;
-- Topics 2 der 18 und 20 WP und Topic 3 der 17 WP sind mit weniger wichtigen Themen der Debatten in BT verbunden;
-- Topics 1 und 4 der 17 WP sind mit Themen der Debatten in BT verbunden, die im Vergleich mit den anderen Topics deutlich weniger wichtig sind.
+- Topics 3 der 13 Wahlperiode (WP) und 4 der 18 WP sind mit wichtigen Themen der Debatten im Bundestag/Parlament verbunden;
+- Topics 2 der 18 und 20 WP und Topic 3 der 17 WP sind mit weniger wichtigen Themen der Debatten im Bundestag/Parlament verbunden;
+- Topics 1 und 4 der 17 WP sind mit Themen der Debatten im Bundestag/Parlament verbunden, die im Vergleich mit den anderen Topics deutlich weniger wichtig sind.
 
-Dieses Ergebnis zeigt, dass die Themen, die mit den Rechenzentren verbunden sind, in ihrer Mehrheit einer spezifischen Agenda angehören, die meistens am Rande der herrschenden Themen der Debatten im BT angesiedelt sind. Um mehr zu diesen Themen zu wissen, müssen wir dann den Rausch in unserer Daten reduzieren. Dies machen wir, wenn wir nur Teile von den Protokollen nehmen, in denen die Rechenzentren explizit erwähnt werden. Dies machen wir im Folgenden.
+Dieses Ergebnis zeigt, dass die Themen, die mit den Rechenzentren verbunden sind, in ihrer Mehrheit einer spezifischen Agenda angehören, die meistens am Rande der herrschenden Themen in den Debatten im Bundestag/Parlament auftauchen. Um mehr zu diesen Themen zu wissen, müssen wir dann den Rausch in unserer Daten reduzieren. Dafür nehmen wir statt ganze Protokolle nur Teile von den Protokollen, in denen die Rechenzentren explizit erwähnt werden.
 
-
-* TM-Analyse auf Teile von Protokollen, die die Rechenzentren explizit erwähnen. Training der Modelle
+* TM-Analyse auf Teile von Protokollen. Training der Modelle
 
 Wir müssen zuerst die Dateien aus unserem Ordner 'Rechenzentren' sortieren, die die Rechenzentren explizit erwähnen. Wir schreiben einen ersten Code-Block, in dem wir einen Ordner 'Rechenzentren_Teile' herstellen, wo wir die relevanten Dateien aus dem Ordner 'Rechenzentren' speichern:
 
@@ -177,7 +164,7 @@ Wir müssen zuerst die Dateien aus unserem Ordner 'Rechenzentren' sortieren, die
      echo "$teile" | while IFS= read -r line ; do cp $line $romdata/Rechenzentren_Teile/; done
 #+end_src
 
-Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] MTA mit der folgenden 'mta-train.txt'-Datei, und wir stellen einen Ordner 'BERT-TM-Skripten' her, um unsere Dateien und Skripten für die TM Analyse in diesem Ordner zu speichern:
+Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] MTA mit der folgenden 'mta-train.txt'-Datei, und wir schaffen einen Ordner 'BERT-TM-Skripten', in dem wir unsere Dateien und Skripten zur TM-Analyse speichern:
 
 #+name: autotrain-01
 #+begin_src shell :var user=nuser :var rech="/home/cpsoz/ROM-Data/Rechenzentren_Teile" :var stopw=stops :results silent
@@ -198,14 +185,14 @@ Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] 
   echo "0" >> $user/BERT-TM-Skripten/mta-train.txt
 #+end_src
 
-Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir führen MTA mit dieser Datei im folgenden Code-Block aus:
+Diese Datei trainiert MTA mit Modellen von 2 bis 15 Topics. Wir führen MTA mit dieser Datei im folgenden Code-Block aus:
 
 #+name: trainmta
 #+begin_src shell :var user=nuser :var usermta="/home/cpsoz/ROM-Data/TM-Analyse/TM-Skripten" :results none
   cat $user/BERT-TM-Skripten/mta-train.txt | python3 $usermta/MTA.py
 #+end_src
 
-Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
+Aus der Datei 'Summary*.log' übernehmen wir die relevanten Informationen zu der optimalen Topics-Anzahl je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Topics-Anzahl nach dem Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
 
 #+name: trainscores
 #+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
@@ -216,7 +203,7 @@ Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevant
   find $mtadir -type d -name "MTA-Results*" -exec rm -r {} +
 #+end_src
 
-Wir können dann die Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block lesen.
+Wir können dann die Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block drucken.
 
 #+name: mta-scores
 #+begin_src shell :var user=nuser :results drawer
@@ -238,11 +225,11 @@ Correlation values LDA-Cophenet: (0.6291944961666273, 0.8664864589342771, 0.7144
 
 :end:
 
-Wir können jetzt die Dateien mit dem optimalen Anzahl an Topics modellieren.
+Damit gehen wir zur Modellierung der Dokumentteile über.
 
 * Modellierung
 
-Dafür stellen wir eine veränderte Version von unserem Code-Block 'autotrain-01', die wir 'autotest-01' benennen:
+Wir schreiben eine veränderte Version von unserem Code-Block 'autotrain-01', den wir 'autotest-01' umbenennen:
 
 #+name: autotest-01
 #+begin_src shell :var user=nuser :var rech="/home/cpsoz/ROM-Data/Rechenzentren_Teile" :var stopw=stops :results silent
@@ -264,14 +251,14 @@ Dafür stellen wir eine veränderte Version von unserem Code-Block 'autotrain-01
   echo "0" >> $user/BERT-TM-Skripten/mta-test.txt
 #+end_src
 
-Dann modellieren wir den ersten Ordner:
+Dann modellieren wir die Dokumentteile im Ordner 'Rechenzentren_Teile':
 
 #+name: testnmta
 #+begin_src shell :var user=nuser :var usermta="/home/cpsoz/ROM-Data/TM-Analyse/TM-Skripten" :results none
   cat $user/BERT-TM-Skripten/mta-test.txt | python3 $usermta/MTA.py
 #+end_src
 
-Wir stellen einen Ordner 'MTA-Results' im Ordner BERT-TM-Analyse, um dort die Ergebnisse aus der Modellierung für jeden Subordner vom Ordner 'Rechenzentren' zu speichern:
+Wir stellen einen Ordner 'MTA-Results' im Ordner BERT-TM-Analyse, um dort die Ergebnisse aus unserer Modellierung zu speichern:
 
 #+name: mtaresults
 #+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none
@@ -283,14 +270,16 @@ Wir können jetzt die Ergebnisse interpretieren.
 
 * Interpretation der Ergebnisse
 
-Wir automatisieren die Interpretation der Ergebnisse mit einer KI. Dafür haben wir die [[https://github.com/aandrew-me/tgpt][Anwendung tgpt]] installiert, die wir programmatisch verwenden können. In einem ersten Schritt stellen wir den Ordner 'MTA-KI' her, in dem wir die Ergebnisse von unserer Interpretation der Topic-Modell-Analyse speichern werden:
+Wir automatisieren die Interpretation der Ergebnisse mit einer KI, wie wir es für die erste Modellierung gemacht haben. In einem ersten Schritt stellen wir den Ordner 'MTA-KI' her, in dem wir die Ergebnisse von unserer Interpretation der Topic-Modell-Analyse speichern werden:
 
 #+name: mta-ki-results
 #+begin_src shell :var user=nuser :results none
   mkdir $user/MTA-KI
 #+end_src
 
-Wir zerlegen die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mit ".out" Endung je Säule der Datei 'Top_Words_NMF_Topics_*.csv' herstellen. Dann passen wir den Inhalt von diesen ".out"-Dateien zur KI und wir speichern die Deutung der KI in einem Dokument. Zuerst schreiben wir den Skript, um die Ergebnisse von MTA zur KI zu senden und die Antworten der KI in eine Datei 'MTA-KI' zu schreiben:
+Wir zerlegen die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mit ".out" Endung je Säule der Datei 'Top_Words_NMF_Topics_*.csv' schreiben. Dann passen wir den Inhalt von diesen ".out"-Dateien zur KI und wir speichern die Deutung der KI in einem Dokument.
+
+Zuerst schreiben wir den Skript, um die Ergebnisse von MTA zur KI zu senden und die Antworten der KI in eine Datei 'MTA-KI' zu schreiben:
 
 #+name: mta-ki-interpret
 #+begin_src shell :var mtares="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/" :var user=nuser :var mtaint="01-MTA-KI.txt" :var mtcut="01-MTA-KI-" :results none
@@ -304,9 +293,7 @@ Wir zerlegen die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mi
   csplit $mtaint /TOPIC/ '{*}' --prefix $mtcut -b "%02d.txt" && rm $mtaint && rm *-KI-00.txt
 #+end_src
 
-An diesem Punkt empfiehlt sich, die Interpretation durch die KI zu kontrollieren bzw. zu korrigieren, und nicht nützliche Informationen aus der Dateien zu entfernen (etwa die Wiederholung der Wortlisten, die wir mit der Modellierung generiert haben).
-
-Einmal die Kontrolle der Berichte erfolgt, bilden wir die für das Thema der Rechenzentren aussagkräftigsten Topics:
+Einmal die Kontrolle der KI-Berichte erfolgt, bilden wir die für das Thema der Rechenzentren aussagkräftigsten Topics ab:
 
 #+name: copy-dt
 #+begin_src shell :var mtares="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/" :results silent
@@ -314,7 +301,7 @@ Einmal die Kontrolle der Berichte erfolgt, bilden wir die für das Thema der Rec
   cp Dominant_Topics_NMF_*.csv $mtares/DT.csv
 #+end_src
 
-Wir bilden einmal alle neun Topics ab:
+Wir bilden einmal das Modell mit allen Topics ab:
 
 #+name: trends-9t
 #+begin_src python :var dt="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/DT.csv" :var saveplot="/home/cpsoz/ROM-Data/BERT-Analyse/Trends9T.pdf" :results Trends9T.pdf file
@@ -390,7 +377,7 @@ Wir bilden einmal alle neun Topics ab:
   #return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
 #+end_src
 
-Wir stellen ähnliche Topics zusammen und bilden dann die übrigen Topics ab:
+Wir stellen ähnliche Topics zusammen und bilden eine verdichtete Darstellung mit sieben Topics ab:
 
 #+name: trends-7t
 #+begin_src python :var dt="/home/cpsoz/ROM-Data/BERT-Analyse/MTA-Results/DT.csv" :var saveplot="/home/cpsoz/ROM-Data/BERT-Analyse/Trends7T.pdf" :results Trends7T.pdf file
@@ -460,3 +447,7 @@ Wir stellen ähnliche Topics zusammen und bilden dann die übrigen Topics ab:
   plt.savefig(pathplot, dpi=300, bbox_inches='tight')
   #return '/home/cpsoz/Github/minipublic/images/Trends.pdf'
 #+end_src
+
+Mit dieser letzten Abbildung haben wir eine bessere Sicht der Entwicklung von relevanten Themen, die mit dem Oberthema 'Rechenzentre' verbunden sind und in den Debatten im deutschen Bundestag/im Parlament vorkommen. Diese Abbildung gibt uns eine Grundlage, um in die relevanten Dateien zu gehen und nach Wortmeldungen von Politikern zu suchen, die mit einem spezifischen Thema verbunden sind, das wir untersuchen möchten.
+
+Mit diesem dritten /worflow/ sind wir am Ende der Arbeit gekommen, die wir im Rahmen von dieser einführenden Untersuchung zum Thema 'Rechenzentren' in den Debatten im deutschen Bundestag/im Parlament leisten wollten.

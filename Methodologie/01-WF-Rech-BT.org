@@ -1,18 +1,18 @@
 * Herstellung eines Datensatzes mit den Parlamentsdokumenten und Protokollen des Bundestages zum Thema Rechenzentren in Deutschland
 
-Dieses Dokument stellt ein Workflow dar, das Dokumente in Text-Dateien umwandelt und in mehreren Schritten umbenannt, sortiert und zerlegt. Wir arbeiten mit einem Linux-Betriebssystem -- in der Zeit des Schreibens ist es Linux Mint mit Kernel 5.4 -- und beziehen die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Empfohlen wird für Windows-Benutzer die Installation von WSL2.
+Dieses Dokument beschreibt ein /workflow/ zur Behandlung der Parlamentsdokumenten und Protokollen des Bundestages (1949-2025). Es wandelt diese Dokumente in Text-Dateien um, und es benennt sie in mehreren Schritten um, sortiert und zerlegt sie. Dieses /workflow/ läuft unter einem Linux-Betriebssystem -- wir haben es mit dem Linux-Kernel 5.4 getestet -- und bezieht die Anwendungen, die diese Familie von Betriebssystemen anbietet. Entsprechende Anpassungen in diesem Dokument müssen unter Windows und MacOS vorgenommen werden. Für Windows-Benutzer wird die Installation von WSL2 empfohlen, das erlaubt, auf Linux zuzugreifen und die Anwendungen zu verwenden, die in diesem /workflow/ verwendet werden.
 
-Die Dokumente sind Parlamentsdokumente der Bundesrepublik Deutschland und Protokollen des Bundestages. Diese Dokumente können an der folgenden Adresse als xml-Dateien, mit einer API oder nach handwerklicher Suche heruntergeladen werden: https://www.bundestag.de/services/opendata.
-Ein Github-Konto bietet ein R-Objekt hier an: https://github.com/benjaminguinaudeau/tidybundestag.
+Die Parlamentsdokumente der Bundesrepublik Deutschland und Protokollen des Bundestages können an der folgenden Adresse als xml-Dateien, mit einer API oder nach handwerklicher Suche heruntergeladen werden: https://www.bundestag.de/services/opendata.
+
+Ein Github-Konto bietet ebenfalls ein R-Objekt an: https://github.com/benjaminguinaudeau/tidybundestag.
+
 Die Parlamentsdokumente könne per Suche auf der Webseite des Bundestages (DIP) oder per API an der folgenden Adresse bezogen werden: https://www.bundestag.de/parlamentsdokumentation.
 
-Mit diesen Dokumenten können Datensätze hergestellt werden, die maschinell untersucht werden können. Inhaltlich liefern diese Dokumente unterschiedliche Informationen zu den politischen Entscheidungen, die von 1949 bis heute auf Bundesebene getroffen werden. Bezogen auf das Thema des Vorhabens in dieser Arbeit erlauben sie eine Rekonstruktion des thematischen Zusammenhanges, in dem die Rechenzentren in Deutschland definiert und problematisiert wurden. Deshalb ist eine Untersuchung dieser Datenbanken zum Verständnis der Entwicklung von Rechenzentren in Deutschland und der Herausforderungen, die damit verbunden sind, vorteilhaft.
-
-Dieses Workflow beschreibt die Stufen zum Aufbau eines solchen Datensatzes und kann als Anwendung verwendet werden (s. u.).
+Inhaltlich liefern diese Dokumente unterschiedliche Informationen zu den politischen Entscheidungen, die von 1949 bis heute (Juni 2025) auf Bundesebene getroffen werden. Bezogen auf das Thema des Vorhabens in dieser Arbeit erlauben sie eine Rekonstruktion des thematischen Zusammenhanges, in dem die Rechenzentren in Deutschland diskutiert wurden.
 
 ** Vorgehen
 
-Die Quelldateien sind im JSON oder XML Format für die Protokollen sowie in PDF Format für die Parlamentsdokumente verfügbar. In diesem Workflow verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
+Die Quelldateien sind im JSON oder XML Format für die Protokollen sowie in PDF Format für die Parlamentsdokumente verfügbar. In diesem /workflow/ verwenden wir die XML Dateien und die PDF Dateien, die sich in unterschiedlichen Ordnern befinden. In einem ersten Schritt wandeln wir die Quelldateien ins Text-Dateien um, d.h.:
 
  - für die Parlamentsdokumente: von *.pdf zu *.txt;
  - für die Protokollen: von *.xml zu *.txt.
@@ -21,16 +21,16 @@ Bibliotheken, die dafür notwendig sind bzw. installiert werden müssen, sind di
 
 ** Dieses Workflow als Anwendung benutzen
 
-Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'datab-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+Dieses /workflow/ kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses /workflow/ kann auf der Kommandozeile mit dem folgenden Skript 'datab-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir mit dem folgenden Code-Block definieren:
 
 #+name: user-path
 #+begin_src shell :var userpath="/home/cpsoz/ROM-Data" :results silent
 echo $userpath
 #+end_src
 
-Pfade müssen von Benutzern des Workflows angepasst werden -- statt /home/cpsoz/ROM-Data kann ein anderer Pfad definiert werden.
+Pfade müssen von Benutzern des Workflows angepasst werden -- statt /home/cpsoz/ROM-Data muss ein Benutzer seinen eigenen Pfad zu den Dokumenten schreiben.
 
-Dann schreiben wir den 'datab-rech.sh' Skript:
+Wir schreiben den Inhalt vom Skript 'datab-rech.sh' und wir machen den Skript ausführbar (Pfade anpassen):
 
 #+begin_src shell :results silent :var user=user-path
   touch $user/datab-rech.sh
@@ -39,18 +39,19 @@ Dann schreiben wir den 'datab-rech.sh' Skript:
   chmod +x $user/datab-rech.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, etwa: bash datab-rech.sh
-WICHTIG!!!: Damit Pfade korrekt erkannt werden, müssen all die möglichen :results output silenced werden bzw. mussen keine output geschrieben werden, also :results silent
+Dieser Skript führt alle Code-Blöcke in diesem /workflow/ aus. Er kann entsprechend mit bash verwendet werden, etwa: bash datab-rech.sh oder dann ./datab-rech.sh.
 
-Zuerst behandeln wir die Parlamentsdokumente.
+WICHTIG!!!: Damit Pfade korrekt erkannt werden, müssen alle ':results' in Code-Blöcken deaktiviert werden, also ':results silent'
+
+Wir fangen jetzt mit der Behandlung der Parlamentsdokumente an.
 
 * Parlamentsdokumente
 
 ** Vorbereitung und Umwandlung
 
-Wir machen eine Sicherheitskopie vom Ordner ParlamentsDoc und vom Ordner XML-Quellen bzw. von den Protokollen des Bundestages. Wir stellen einen Ordner 'Skripten-Rom' für die Skripten her, die wir im Laufe des Workflow produzieren werden.
+Wir machen eine Sicherheitskopie vom Ordner 'ParlamentsDoc' und vom Ordner 'XML-Quellen', in denen wir die Parlamentsdokumente und die Protokollen des Bundestages gespeichert haben. Wir stellen einen Ordner 'Skripten-Rom' für die Skripten her, die wir im Laufe dieses /workflows/ generieren werden.
 
-Wir definieren die Pfade zu den PDF- und XML-Dateien.
+Wir definieren die Pfade zu den PDF- und XML-Dateien (Pfade anpassen).
 
 #+name: pdfpath
 #+begin_src shell :results silent :var pdfpath="/ParlamentsDoc/Parlamentsdokumente_Sozialindex"
@@ -62,7 +63,7 @@ echo $pdfpath
 echo $xmlpath
 #+end_src
 
-Wir machen eine Kopie der Quelldateien.
+Wir machen eine Kopie der Quelldateien (Pfade anpassen).
 
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path :eval no
     cd $user
@@ -71,7 +72,7 @@ Wir machen eine Kopie der Quelldateien.
     mkdir $user/Skripten-Rom
 #+end_src
 
-Wir behalten den Pfad zum Skripten-Ordner in einer Variable 'skriptenpath'
+Wir behalten den Pfad zum Skripten-Ordner in einer Variable 'skriptenpath' (Pfade anpassen).
 
 #+name: skriptenpath
 #+begin_src shell :results silent :var skriptenpath="/Skripten-Rom"
@@ -98,7 +99,7 @@ Wir wandeln die Parlamentsdokumente um.
 
 ** Parlamentsdokumente nach Stichwort sortieren
 
-Wir sortieren die konvertierten Dateien nach einem Stichwort "Rechenzentr", um alle Varianten vom Begriff "Rechenzentrum" (Nominativ, Genitiv, Plural/Einzahlformen) abzufangen. Dafür brauchen wir einen Skript, der in alle Ordner geht, in denen die Dokumente gespeichert sind und nur die Dokumente nimmt, die eine Variante vom erwünschten Begriff enthalten. Diese Dokumente werden in einem Ordner "Rechenzentr_res" gespeichert.
+Wir sortieren die konvertierten Dateien nach dem Stichwort "Rechenzentr", um alle Varianten vom Begriff "Rechenzentrum" (Nominativ, Genitiv, Plural/Singular) abzufangen. Dafür brauchen wir einen Skript, der in alle Ordner geht, in denen die Dokumente gespeichert sind, und nur die Dokumente aufnimmt, die eine Variante vom Stichwort enthalten. Diese Dokumente werden in einem Ordner "Rechenzentr_res" gespeichert.
 
 #+name: filter_parl
 #+begin_src shell :results silent :var user=user-path :var skr=skriptenpath
@@ -130,11 +131,11 @@ Wir behandeln anschließend die Protokollen des Bundestages.
 
 * Protokollen
 
-Wir müssen die Dateien in den jeweiligen Unterordner (von 01 bis 19) konvertieren. Es sind XML-Dateien, die wir mit Pandoc konvertieren können. Dabei wollen wir zwei Zeilen (<div> und <sp> Zeilen) aus den Quellen behalten, weil diese Zeilen Metainformationen enthalten, die wir benutzen werden, um die Dateien in einem späteren Schritt zu zerlegen.
+Wir müssen die Dateien in den jeweiligen Unterordnern (von 01 bis 19) konvertieren. Es sind XML-Dateien, die wir mit Pandoc konvertieren. Dabei wollen wir zwei Zeilen (<div> und <sp> Zeilen) aus den Quellen behalten, weil diese Zeilen Metadaten enthalten, die wir benutzen werden, um die Dateien in einem späteren Schritt zu zerlegen.
 
 ** Vorbereitung und Umwandlung
 
-Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh (s. u.).
+Wir löschen den Ordner 19 in 'XML-Quellen', der anders als die anderen formatiert ist. Wir behandeln diesen Ordner mit einer veränderten Version von parsprot.sh und zerlg-prot.sh später (s.u.).
 
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path
   rm -r $user/$xml/19
@@ -166,14 +167,14 @@ Wir gehen dann in alle Ordner und konvertieren die XML-Dateien in *.txt-Dateien,
   for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and converting files" && bash $user/$skr/parsprot.sh; done;
 #+end_src
 
-Wir haben jetzt eine Datei je Sitzung und TOP. Wir müssen diese Dateien nach dem für uns relevanten Stichwort "Rechenzentr" sortieren, bevor wir sie nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien je Stichwort und dabei benutzen wir den gleichen Skript wie für die Parlamentsdokumente.
+Wir haben jetzt eine Datei je Sitzung und TOP. Wir müssen diese Dateien nach dem für uns relevanten Stichwort "Rechenzentr" sortieren, bevor wir sie nach Sprechern in den jeweiligen TOP zerlegen. Wir sortieren zuerst die Dateien mit dem gleichen Skript wie für die Parlamentsdokumente.
 
 #+name: umw_prot2
 #+begin_src shell :results silent :var xml=xmlpath :var skr=skriptenpath :var user=user-path
   for dir in $user/$xml/*; do [ -d "$dir" ] && cd "$dir" && echo "Entering into $dir and sorting files" && bash $user/$skr/filter.sh; done;
 #+end_src
 
-Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Wir brauchen einen neuen Skript für die Zerlegung der Dateien.
+Dann können wir die Protokolle nach Sprechern zerlegen sowie die Dateien nach Sprecher/Rolle/Partei umbenennen. Wir brauchen einen neuen Skript für die Zerlegung der Dateien.
 
 #+name: zerleg_prot
 #+begin_src shell :results silent :var skr=skriptenpath :var user=user-path
@@ -189,7 +190,7 @@ Dann können wir den letzten Schritt machen und die Protokolle nach Sprechern ze
       mv $user/zerleg-prot.sh $user/$skr
 #+end_src
 
-Wir stellen einen Ordner 'XML-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
+Wir stellen einen Ordner 'XML-Results' her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesem Ordner:
 
 #+name: zerleg_results
 #+begin_src shell :results silent :var xml=xmlpath :var user=user-path
@@ -205,7 +206,7 @@ Wir gehen mit unserem Skript 'zerleg-prot.sh' zum Ordner 'XML-Results/Rechenzent
   sh $user/$skr/zerleg-prot.sh
 #+end_src
 
-Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden in einem gemeinsamen Ordner gruppieren werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln, der Dateien enthält, die anders als die Dateien in den anderen Ordnern formatiert wurde.
+Damit haben wir alle relevante Protokolle nach Sprecher, Rolle und Partei zerlegt. 6408 Dateien werden generiert, die wir später mit den anderen Dateien nach Wahlperioden in einem gemeinsamen Ordner zusammenstellen werden. Wir müssen noch den Ordner 19 aus den XML-Quellen behandeln, der Dateien enthält, die anders als die Dateien in den anderen Ordnern formatiert wurden.
 
 ** Behandlung des Ordners 19
 
@@ -241,7 +242,7 @@ Wir konvertieren die Dateien in diesem Ordner und wir sortieren sie nach unserem
   cd $user/19 && bash $user/$skr/parsprot19.sh && bash $user/$skr/filter.sh
 #+end_src
 
-Wir stellen einen Ordner '19-Results' im Arbeitsverzeichnis her, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' in diesen Ordner:
+Wir schaffen einen Ordner '19-Results' im Arbeitsverzeichnis, und wir kopieren alle Dateien aus den Unterordnern 'Rechenzentr_res' zu diesem Ordner:
 
 #+name: zerleg19_results
 #+begin_src shell :results silent :var user=user-path
@@ -249,7 +250,7 @@ Wir stellen einen Ordner '19-Results' im Arbeitsverzeichnis her, und wir kopiere
   for i in $user/19/Rechenzentr_res/*.txt; do cp "$i" $user/19-Results/; done
 #+end_src
 
-Wir brauchen anschließend eine veränderte Version von unserem Skript 'zerleg-prot.sh', da die tags in den Protokollen des Ordners 19 unterschiedlich plaziert sind:
+Wir brauchen anschließend eine veränderte Version von unserem Skript 'zerleg-prot.sh', da die Metadaten in den Protokollen des Ordners 19 unterschiedlich plaziert sind:
 
 #+name: zerleg19_prot
 #+begin_src shell :results silent :var skr=skriptenpath :var user=user-path
@@ -275,16 +276,16 @@ Jetzt können wir mit diesem Skript die Dokumente im Ordner '19-Results' zerlege
 
 ** Fehlende Protokolle hinzufügen
 
-In unserer Version der Protokollen des Bundestages gehen die Dateien von 1949 bis zum 17.05.2023. Die weiteren Protokollen haben wir mit Verwendung der Suchmaschine auf der Webseite des Bundestages als XML-Dateien handwerklich heruntergeladen und in *.txt-Dateien umgewandelt. Die Suche mit der Suchmaschine ergibt die Dateien mit den spezifischen Passagen aus den Protokollen, die das Stichwort "Rechenzentr" enthalten, weshalb wir keine volle Protokollen heruntergeladen haben, sondern die Ergebnisdokumente mit den betreffenden Stellen. Diese Dateien sind Fragen an den Bundestag, Antworten vom Bundestag, Unterrichtungen, Berichte, Gesetzentwürfe, Beschlussempfehlungen, Entschliessungsanträge, die keine besondere tags enthalten.
+In unserer Version der Protokollen des Bundestages gehen die Dateien von 1949 bis zum 17.05.2023. Die weiteren Protokollen haben wir mit Verwendung der Suchmaschine auf der Webseite des Bundestages als XML-Dateien handwerklich heruntergeladen und in *.txt-Dateien umgewandelt. Die Suche mit der Suchmaschine ergibt die Dateien mit den spezifischen Passagen aus den Protokollen, die das Stichwort "Rechenzentr" enthalten, weshalb wir keine volle Protokollen heruntergeladen haben, sondern die Ergebnisdokumente mit den betreffenden Stellen. Diese Dateien sind Fragen an den Bundestag, Antworten vom Bundestag, Unterrichtungen, Berichte, Gesetzentwürfe, Beschlussempfehlungen, Entschliessungsanträge, die keine besondere Metadaten enthalten.
 
-Wir speichern diese Dateien in einem Ordner 'ROM-Data-2023-2025' für die Zeit der Erfassung der Protokollen (Juni 2025), und diesen Ordner kopieren wir in unseren Arbeitsordner:
+Wir speichern diese Dateien in einem Ordner 'ROM-Data-2023-2025' für die Zeit der Erfassung der Protokollen (Juni 2025), und diesen Ordner kopieren wir zu unserem Arbeitsordner:
 
 #+name: data23-25
 #+begin_src shell :var user=user-path :results silent
 cp -r /home/cpsoz/ROM-Data-2023-2025 $user
 #+end_src
 
-Wir wandeln die *.xml-Dateien in *.txt-Dateien:
+Wir wandeln die *.xml-Dateien in *.txt-Dateien um:
 
 #+name: umw-data2325
 #+begin_src shell :var user=user-path :results silent
@@ -295,14 +296,14 @@ Wir wandeln die *.xml-Dateien in *.txt-Dateien:
 
 ** Zusammenführung der Dateien
 
-Unsere Dateien befinden sich in drei unterschiedlichen Ordnern, weshalb wir sie in einem gemeinsamen Ordner speichern möchten. Dafür stellen wir den gemeinsamen Ordner 'Rechenzentren' mit folgenden Zeilen her:
+Unsere Dateien befinden sich in drei unterschiedlichen Ordnern, weshalb wir sie in einem gemeinsamen Ordner speichern möchten. Dafür schaffen wir den gemeinsamen Ordner 'Rechenzentren' mit folgenden Zeilen:
 
 #+name: rechenordner
 #+begin_src shell :var user=user-path :results silent
   cd $user && mkdir Rechenzentren
 #+end_src
 
-Wir kopieren die Dateien von den drei 'Results' Ordner zu unserem Rechenzentren-Ordner.
+Wir kopieren die Dateien von den drei 'Results' Ordnern zu unserem Rechenzentren-Ordner.
 
 #+name: kop-rechenordner
 #+begin_src shell :var user=user-path :results silent
@@ -347,4 +348,4 @@ Wir verschieben dann die Dateien zu den geeigneten Wahlperioden und wir löschen
   find . -type d -empty -delete
 #+end_src
 
-Unser Datensatz ist jetzt bereit und kann analysiert werden. Dies erfolgt im einem [[file+sys:~/Github/rom/Methodologie/02-WF-Rech-TM.org][zweiten Workflow]].
+Unser Datensatz ist jetzt bereit für die Analyse. Diese erfolgt im einem [[file+sys:~/Github/rom/Methodologie/02-WF-Rech-TM.org][zweiten Workflow]].

@@ -1,23 +1,23 @@
 * Topic-Modell-Analyse zu den allgemeinen Themen um die Rechenzentren in den Debatten des Bundestages in Deutschland
 
-Dieses Dokument stellt ein Workflow zur Topic-Modell-Analyse von Dokumenten dar, die erlauben, die politischen Entscheidungen zum Thema Rechenzentren in Deutschland zu rekonstruieren. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem entsprechenden [[file:01-WF-Rech-BT.org][ersten Workflow]] hergestellt haben. Wie unser erstes Workflow kann dieses Workflow als Anwendung verwendet werden (s. u.).
+Dieses Dokument stellt ein /workflow/ zur Topic-Modell-Analyse von Debatten zum Thema Rechenzentren im deutschen Bundestag/Parlament. Hierfür verwenden wir einen Datensatz, den wir im Rahmen von einem [[file:01-WF-Rech-BT.org][ersten workflow]] hergestellt haben. Wie unser erstes /workflow/ kann dieses /workflow/ als Anwendung verwendet werden (s. u.).
 
 ** Vorgehen
 
-Die Quelldateien sind in einem Arbeitsordner im Unterordner 'Rechenzentren' bzw. in verschiedenen Unterordnern in diesem Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperiode von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen in jeder Wahlperioden, die mit dem Oberthema Rechenzentren verbunden sind, abgefangen werden können.
+Die Quelldateien sind in verschiedenen Unterordnern im Ordner 'Rechenzentren' gespeichert. Diese Unterordner bezeichnen die Dokumente zu Rechenzentren für jede Wahlperiode von 1949 bis 2025. Ziel von dieser Analyse ist, ein optimales Topic-Modell je Ordner zu bilden, damit die Themen für jede Wahlperiode, die mit dem Oberthema Rechenzentren verbunden sind, abgebildet werden können.
 
-Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise aus Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die wir dann nach Bedarf korrigieren. Es entstehen entsprechend Deutungsberichte, die wir in diesem Workflow getrennt voneinander untersuchen. In einem dritten Workflow werden wir diese unterschiedlichen Berichte miteinander vergleichen, um eine Sicht über die Vielfalt von Themen in der Zeit und ihre Entwicklung zu gewinnen.
+Diese Themen ergeben sich im Rahmen von Topic-Modell-Verfahren üblicherweise aus Listen von Begriffen, die die jeweiligen Themenstrukturen einer Dokumentensammlung beschreiben. Diese Listen müssen interpretiert werden, damit die Themenstrukturken definiert werden können. Zu diesem Zweck benutzen wir eine künstliche Intelligenz, die eine Deutung der Wörterlisten vorschlägt, die nach Bedarf korrigiert wird. Es entstehen entsprechend Deutungsberichte, die wir in diesem /workflow/ getrennt voneinander untersuchen. In einem [[file+sys:~/Github/rom/Methodologie/03-WF-Rech-TM.org][dritten Workflow]] werden wir diese unterschiedlichen Berichte miteinander vergleichen, um die Vielfalt von Themen in der Zeit und ihre entsprechende zeitliche Entwicklung abzubilden.
 
-** Dieses Workflow als Anwendung benutzen
+** Dieses /workflow/ als Anwendung benutzen
 
-Dieses Workflow kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses Workflow kann auf der Kommandozeile mit dem folgenden Skript 'tm-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir im Folgenden mit diesem Code-Block herstellen:
+Dieses /workflow/ kann wie eine Anwendung verwendet werden. Erforderlich dafür ist die Installation vom Texteditor Emacs mit Org-mode (ab emacs-28 ist Org-mode mit dem Texteditor geliefert und muss nicht separat installiert werden). Dieses /workflow/ kann auf der Kommandozeile mit dem folgenden Skript 'tm-rech.sh' ausgeführt werden. Ein solcher Skript wird im Arbeitsordner hergestellt, den wir mit dem folgenden Code-Block definieren (Pfad anpassen):
 
 #+name: user-path
 #+begin_src shell :var user="/home/cpsoz/ROM-Data" :results silent
   mkdir $user/TM-Analyse
 #+end_src
 
-Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir einen Ordner 'TM-Skripten' für die Skripten, die wir im Rahmen von diesem Workflow schreiben werden, und wir definieren den vollständigen Pfad zum Ordner 'TM-Analyse' als neuen Benutzerpfad:
+Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir einen Ordner 'TM-Skripten' für die Skripten, die wir im Rahmen von diesem /workflow/ schreiben, und wir definieren den vollständigen Pfad zum Ordner 'TM-Analyse' als neuen Benutzerpfad (Pfad anpassen):
 
 #+name: nuser
 #+begin_src shell :var nuserpath="/home/cpsoz/ROM-Data/TM-Analyse" :results silent
@@ -29,9 +29,7 @@ Unsere Analyse wird in diesem Ordner 'TM-Analyse' stattfinden. Dort stellen wir 
   mkdir $userpath/TM-Skripten
 #+end_src
 
-Wichtig: wie im ersten Workflow müssen Pfade von Benutzern des Workflows angepasst werden.
-
-Dann schreiben wir den 'tm-rech.sh' Skript:
+Dann schreiben wir den 'tm-rech.sh' Skript wie folgt:
 
 #+begin_src shell :results silent :var user=nuser
   touch $user/tm-rech.sh
@@ -40,9 +38,9 @@ Dann schreiben wir den 'tm-rech.sh' Skript:
   chmod +x $user/tm-rech.sh
 #+end_src
 
-Dieser Skript führt alle Code-Blöcke in diesem Workflow aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash tm-rech.sh (hier muss das Workflow im gleich Verzeichnis sein, in dem tm-rech.sh sich befindet).
+Dieser Skript führt alle Code-Blöcke in diesem /workflow/ aus. Er kann entsprechend mit bash verwendet werden, wie etwa: bash tm-rech.sh oder ./tm-rech.sh.
 
-Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung funktioniert mit Python3.x und der [[https://www.anaconda.com/download][Anaconda-Distribution]]. Sie kann mit den üblichen Betriebssysteme verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Ein Code-Block stellen wir her, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
+Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp1972/mta-app][MTA]]. Diese Anwendung erfordert Python3.x. Sie kann mit Linux, Windows und MacOS verwendet werden (vgl. [[https://github.com/cp1972/mta-app/blob/main/install.md][die Dokumentation der Installation von MTA]]). Den folgenden Code-Block schreiben wir, um MTA zu unserem 'TM-Skripten' Ordner zu kopieren:
 
 #+name: mta-copy
 #+begin_src shell :var mtap="/home/cpsoz/Github/mta-app" :var user=nuser :results silent
@@ -51,21 +49,21 @@ Die Topic-Modell-Analyse führen wir mit der Anwendung [[https://github.com/cp19
 
 * TM-Analyse. Training der Modelle
 
-Im Rahmen von Topic-Modell-Analysen müssen wir zuerst wissen, wie viele Themen für einen bestimmten Datensatz sinnvoll zu modellieren sind. Deshalb müssen wir in einem ersten Schritt MTA auf die Dateien trainieren, die wir in den Unterordnern vom Ordner 'Rechenzentren' gespeichert haben. Wir schreiben einen ersten Code-Block zum Ordner 'Rechenzentren'
+Im Rahmen von Topic-Modell-Analysen müssen wir zuerst wissen, wie viele Themen für einen bestimmten Datensatz sinnvoll zu modellieren sind. Deshalb müssen wir in einem ersten Schritt MTA auf die Dateien trainieren, die wir in den Unterordnern vom Ordner 'Rechenzentren' gespeichert haben. Wir schreiben einen ersten Code-Block, um den Ordner 'Rechenzentren' als Variable in den nachfolgenden Blöcken zu definieren (Pfad anpassen):
 
 #+name: rechpfad
 #+begin_src shell :var rechpath="/home/cpsoz/ROM-Data/Rechenzentren" :results silent
   echo $rechpath
 #+end_src
 
-Wir müssen auch bedenken, dass MTA eine Liste von Wörtern (ein Wort je Zeile) braucht, die für die Analyse sehr wenig bis nicht relevant sind und deshalb nicht berücksichtigt werden müssen. Es sind Stop-Wörter, die in unserem Fall deutsche Wörter sind und sich im folgenden Ordner befinden:
+Wir müssen auch bedenken, dass MTA eine Liste von Wörtern (ein Wort je Zeile) braucht, die für die Analyse sehr wenig bis nicht relevant sind und deshalb nicht berücksichtigt werden müssen. Es sind Stop-Wörter, die in unserem Fall deutsche Wörter sind und sich im folgenden Ordner befinden (Pfad anpassen):
 
 #+name: stops
 #+begin_src shell :var stopwords="/home/cpsoz/Org/Stopwords" :results silent
   echo $stopwords
 #+end_src
 
-Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] MTA mit der folgenden 'mta-train.txt'-Datei, die wir in unserem 'TM-Skripten' Ordner speichern:
+Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] die Ausführung von MTA mit der folgenden 'mta-train.txt'-Datei, die wir in unserem 'TM-Skripten' Ordner speichern:
 
 #+name: autotrain-01
 #+begin_src shell :var user=nuser :var rech=rechpfad :var stopw=stops :results silent
@@ -85,14 +83,14 @@ Wir [[https://github.com/cp1972/mta-app/blob/main/automate.md][automatisieren]] 
   echo "0" >> $user/TM-Skripten/mta-train.txt
 #+end_src
 
-Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Wir führen MTA mit dieser Datei im folgenden Code-Block aus:
+Diese Datei trainiert MTA mit Modellen, die von 2 bis 15 Topics reichen. Entsprechend führen wir MTA mit dem folgenden Code-Block aus:
 
 #+name: trainmta
 #+begin_src shell :var user=nuser :results none
   cat $user/TM-Skripten/mta-train.txt | python3 $user/TM-Skripten/MTA.py
 #+end_src
 
-Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevanten Informationen zu den optimalen Zahlen der Topics je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Anzahl der Topics nach Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
+Aus den Ergebnissen von MTA in der Datei 'Summary*.log' übernehmen wir die relevanten Informationen zur optimalen Anzahl der Topics je Kreuzvalidierungsmethode, die MTA verwendet. Wir übernehmen auch die Information zu der besten Anzahl der Topics nach dem Cophenet Korrelationskoeffizient. Wir speichern diese Informationen in einer Datei 'TM-train-scores.txt'.
 
 #+name: trainscores
 #+begin_src shell :var mtadir="/home/cpsoz/Github/rom/Methodologie" :var user=nuser :results silent
@@ -103,7 +101,7 @@ Aus den Ergebnissen von MTA nehmen wir aus der Datei 'Summary*.log' die relevant
   find $mtadir -type d -name "MTA-Results*" -exec rm -r {} +
 #+end_src
 
-Wir evaluieren die folgenden Code-Blöcke für die weiteren Unterordner im Ordner 'Rechenzentren':
+Wir evaluieren die folgenden Code-Blöcke für die anderen Unterordner im Ordner 'Rechenzentren':
 
 #+name: autotrain-02
 #+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
@@ -229,18 +227,18 @@ Dann modellieren wir den Ordner 19:
   <<trainscores>>
 #+end_src
 
-Wir können dann alle Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block lesen.
+Wir drucken in dieser Datei alle Ergebnisse aus der Datei 'TM-train-scores.txt' mit dem folgenden Code-Block.
 
 #+name: mta-scores
 #+begin_src shell :var user=nuser :results drawer
     cat $user/TM-train-scores.txt
 #+end_src
 
-Wir können jetzt die Dateien mit dem optimalen Anzahl an Topics modellieren.
+Wir können jetzt die Dateien mit der optimalen Topics-Anzahl modellieren.
 
 * Modellierung
 
-Dafür stellen wir eine veränderte Version von unserem Code-Block 'autotrain-01', die wir 'autotest-01' benennen:
+Dafür stellen wir eine veränderte Version von unserem Code-Block 'autotrain-01', die wir 'autotest-01' umbenennen und anpassen:
 
 #+name: autotest-01
 #+begin_src shell :var user=nuser :var rech=rechpfad :var stopw=stops :results silent
@@ -269,7 +267,7 @@ Dann modellieren wir den ersten Ordner:
   cat $user/TM-Skripten/mta-test.txt | python3 $user/TM-Skripten/MTA.py
 #+end_src
 
-Wir stellen einen Ordner 'MTA-Results' im Ordner TM-Analyse, um dort die Ergebnisse aus der Modellierung für jeden Subordner vom Ordner 'Rechenzentren' zu speichern:
+Wir schaffen einen Ordner 'MTA-Results' im Ordner TM-Analyse, um dort die Ergebnisse aus der Modellierung für jeden Subordner vom Ordner 'Rechenzentren' zu speichern:
 
 #+name: mtaresults
 #+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none
@@ -277,7 +275,7 @@ Wir stellen einen Ordner 'MTA-Results' im Ordner TM-Analyse, um dort die Ergebni
   mv $mtadir/MTA* $user/MTA-Results/
 #+end_src
 
-Dasselbe machen wir für die weiteren Subordner im Ordner 'Rechenzentren' mit Anpassung des Ordners (Zeile 1), der Anzahl an Topics (Zeile 10) und des Fensters für die Modellierung in der Zeit (Zeile 13). Wir benennen die MTA-Results-Ordner nach dem Subordner im Ordner 'Rechenzentren' um:
+Dasselbe machen wir für die weiteren Subordner im Ordner 'Rechenzentren' mit Anpassung des Subordners (Zeile 1), der Anzahl an Topics (Zeile 10) und des Fensters für die Modellierung in der Zeit (Zeile 13). Wir benennen die MTA-Results-Ordner nach den jeweiligen entsprechenden Subordnern im Ordner 'Rechenzentren' um:
 
 #+name: autotest-02
 #+begin_src shell :var user=nuser :var mtadir="/home/cpsoz/Github/rom/Methodologie" :results none :noweb yes
@@ -444,14 +442,16 @@ Wir können jetzt die Ergebnisse interpretieren.
 
 * Interpretation der Ergebnisse
 
-Wir automatisieren die Interpretation der Ergebnisse mit einer KI. Dafür haben wir die [[https://github.com/aandrew-me/tgpt][Anwendung tgpt]] installiert, die wir programmatisch verwenden können. In einem ersten Schritt stellen wir den Ordner 'MTA-KI' her, in dem wir die Ergebnisse von unserer Interpretation der Topic-Modell-Analyse speichern werden:
+Wir automatisieren die Interpretation der Ergebnisse mit einer KI. Dafür haben wir die [[https://github.com/aandrew-me/tgpt][Anwendung tgpt]] installiert, die wir programmatisch und ohne API (Stand Juni 2025) verwenden können. In einem ersten Schritt schaffen wir den Ordner 'MTA-KI', in dem wir die Ergebnisse von unserer Interpretation der Topic-Modell-Analyse speichern:
 
 #+name: mta-ki-results
 #+begin_src shell :var user=nuser :results none
   mkdir $user/MTA-KI
 #+end_src
 
-Wir gehen dann in den jeweiligen Ordner mit den Ergebnissen aus der Topic-Modell-Analyse, wir zerlegen die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mit ".out" Endung je Säule der Datei 'Top_Words_NMF_Topics_*.csv' herstellen. Dann passen wir den Inhalt von diesen ".out"-Dateien zur KI und wir speichern die Deutung der KI in einem Dokument. Zuerst schreiben wir den Skript, um die Ergebnisse von MTA zur KI zu senden und die Antworten der KI in eine Datei 'MTA-KI' zu schreiben:
+Wir gehen dann in die jeweiligen Ordner mit den Ergebnissen aus der Topic-Modell-Analyse. Dort zerlegen wir die Datei 'Top_Words_NMF_Topics_*.csv' so, dass wir ein Dokument mit ".out" Endung je Säule der Datei 'Top_Words_NMF_Topics_*.csv' herstellen. Dann passen wir den Inhalt von diesen ".out"-Dateien zur KI und wir speichern die Deutung der KI in einem entsprechenden Dokument.
+
+Zuerst schreiben wir den Skript, um die Ergebnisse von MTA zur KI zu senden und die Antworten der KI in einer Datei 'MTA-KI' zu schreiben:
 
 #+name: mta-ki-interpret
 #+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-01/" :var user=nuser :var mtaint="01-MTA-KI.txt" :var mtcut="01-MTA-KI-" :results none
@@ -465,7 +465,7 @@ Wir gehen dann in den jeweiligen Ordner mit den Ergebnissen aus der Topic-Modell
   csplit $mtaint /TOPIC/ '{*}' --prefix $mtcut -b "%02d.txt" && rm $mtaint && rm *-KI-00.txt
 #+end_src
 
-Dann machen wir die Interpretation für jeden Ordner:
+Jetzt können wir mit der Interpretation für jeden Ordner starten:
 
 #+name: mta-ki-02
 #+begin_src shell :var mtares="/home/cpsoz/ROM-Data/TM-Analyse/MTA-Results/MTA-02/" :var user=nuser :var mtaint="02-MTA-KI.txt" :var mtcut="02-MTA-KI-" :results none :noweb yes
@@ -547,12 +547,12 @@ Dann machen wir die Interpretation für jeden Ordner:
   <<mta-ki-interpret>>
 #+end_src
 
-An diesem Punkt empfiehlt sich, die Interpretation durch die KI zu kontrollieren bzw. zu korrigieren, und nicht nützliche Informationen aus der Dateien zu entfernen (etwa die Wiederholung der Wortlisten, die wir mit der Modellierung generiert haben). Diese Interpretationsberichte verwenden wir in einem dritten Workflow zur Erkennung von semantischen Ähnlichkeiten in der Interpretation der Modelle, die Auskunft über die Anwesenheit von ähnlichen Themen im Rahmen der 20 Wahlperioden, die wir berücksichtigen.
+An diesem Punkt empfiehlt es sich, die Interpretation durch die KI zu kontrollieren bzw. zu korrigieren, und Informationen aus der von der KI generierten Dateien zu entfernen, die nicht relevant sind (etwa die Wiederholung der Wortlisten, die wir mit der Modellierung generiert haben). Diese Interpretationsberichte verwenden wir in einem [[file+sys:~/Github/rom/Methodologie/03-WF-Rech-TM.org][dritten Workflow]] zur Erkennung von semantischen Ähnlichkeiten in der Interpretation der Modelle, die Auskunft über die Anwesenheit von ähnlichen Themen im Rahmen der 20 Wahlperioden geben.
 
 * Fazit
 
-Mit diesem zweiten Workflow haben wir eine Modellierung des allgemeinen Kontextes der Debatten im Bundestag zum Thema Rechenzentren in Deutschland für die Zeit von 1949 bis 2025 vorgeschlagen. Wie hilfreich eine solche Modellierung ist, untersuchen wir in einem dritten Workflow. In diesem dritten Workflow analysieren wir die Ähnlichkeiten zwischen Themen in den unterschiedlichen Wahlperioden, was uns erlaubt, wiederholende Themen in der Zeit von 1949 bis 2025 zu erkennen, sowie die Entstehung von neuen Themen und das Verschwinden von alten Themen zu datieren.
+Mit diesem zweiten /workflow/ haben wir eine Modellierung des allgemeinen Kontextes der Debatten im Bundestag zum Thema Rechenzentren in Deutschland für die Zeit von 1949 bis 2025 vorgeschlagen. Wie hilfreich eine solche Modellierung ist, untersuchen wir in einem [[file+sys:~/Github/rom/Methodologie/03-WF-Rech-TM.org][dritten workflow]].. Dort analysieren wir die Ähnlichkeiten zwischen Themen in den unterschiedlichen Wahlperioden, was uns erlaubt, wiederholende Themen in der Zeit von 1949 bis 2025 zu erkennen, sowie die Entstehung von neuen Themen und das Verschwinden von alten Themen zu datieren.
 
-In diesem Zusammenhang werden wir uns fragen, ob die vorhandene Information ausreicht, um das Thema der Rechenzentren in Deutschland besser zu verstehen, oder ob wir gezielt eine eingeschränkte Anzahl an Dateien modellieren sollten, um mehr bzw. präzisere Informationen zu diesem Thema zu erhalten.
+Damit können wir besser einschätzen, ob die vorhandene Information ausreicht, um das Thema der Rechenzentren in Deutschland besser zu verstehen, oder ob wir eine eingeschränkte Anzahl an Dateien modellieren sollten, um mehr bzw. präzisere Informationen zu diesem Thema zu erhalten.
 
 Dies erfolgt im einem [[file+sys:~/Github/rom/Methodologie/03-WF-Rech-TM.org][dritten Workflow]].
