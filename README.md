@@ -1,4 +1,6 @@
-# ROM
-ROM für Research On Machines. In diesem Ordner findet man eine Arbeit am Verständnis der Entwicklung von KI und ihre Bedeutung für Gesellschaft u.a. vom Standpunkt der Theorie der Relation.
+# Festschrift RS
 
-Dieser Readme wird entsprechend erweitert werden, um die Leser einen pädagogischen Zugang zu den unterschiedlichen Argumente zu geben, die das allgemeine Argument in dieser Arbeit strukturieren.
+In diesem Ordner findet man:
+
+- das Kapitel zur Festschrift RS am Thema Rechenzentrum;
+- die Worflows, die im Rahmen von diesem Kapitel benutzt wurden, um eine Topic-Modelle-Analyse zu den Protokollen des deutschen Bundestages und den Parlamentsdokumenten des deutschen Parlaments von 1949 zu Juni 2025.
